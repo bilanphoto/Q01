@@ -58,6 +58,7 @@
             display: block;
             width: 100%;
             height: auto;
+            touch-action: none;
         }
         .mode-btn {
             padding: 12px 20px;
@@ -262,7 +263,6 @@
     </div>
 
     <script>
-        // ตัวแปรสำหรับ Canvas และการวาด
         const canvas = document.getElementById('imageCanvas');
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
@@ -271,46 +271,58 @@
         let shapes = [];
         let mainImages = [];
 
-        // ตั้งค่า Canvas เริ่มต้น (อัตราส่วน 3:2)
         canvas.width = 1200;
         canvas.height = 800;
 
-        // ฟังก์ชันสำหรับวาดทุกอย่างบน Canvas
+        // ฟังก์ชันแปลงพิกัดจาก mouse/touch event
+        function getCanvasCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            let clientX, clientY;
+            
+            // รองรับทั้ง mouse และ touch events
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
         function redrawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // วาดพื้นหลังสี #F5F5F5 (สีเทาอ่อน)
             ctx.fillStyle = '#F5F5F5';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // วาดรูปภาพหลักพร้อมเงา
             mainImages.forEach(img => {
-                // บันทึก context state
                 ctx.save();
-                
-                // ตั้งค่าเงา
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'; // สีเงาดำโปร่งใส
-                ctx.shadowBlur = 15; // ความเบลอของเงา
-                ctx.shadowOffsetX = 5; // ระยะเงาแนวนอน
-                ctx.shadowOffsetY = 5; // ระยะเงาแนวตั้ง
-                
-                // วาดรูปภาพ
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                ctx.shadowBlur = 15;
+                ctx.shadowOffsetX = 5;
+                ctx.shadowOffsetY = 5;
                 ctx.drawImage(img.image, img.x, img.y, img.width, img.height);
-                
-                // คืนค่า context state (ลบเงาสำหรับการวาดอื่นๆ)
                 ctx.restore();
             });
             
-            // วาดข้อมูลพื้นฐาน
             drawTemplateData();
             
-            // วาดรูปทรงทั้งหมด
             shapes.forEach(shape => {
                 drawShape(shape);
             });
         }
 
-        // ฟังก์ชันวาดข้อมูลจาก Template
         function drawTemplateData() {
             const area = document.getElementById('areaInput').value;
             const titleJob = document.getElementById('titleJopInput').value;
@@ -319,51 +331,54 @@
 
             ctx.fillStyle = '#000000';
             
-            // วาดหัวข้อ Operation Report
-            ctx.font = 'bold 20px Inter';
-            let yPos = 30;
-            ctx.fillText('Operation Report', 20, yPos);
-            yPos += 40;
+            let yPos = 40;
+            let yPosRight = 40;
             
-            // วาดข้อมูลอื่นๆ พร้อม Label
-            ctx.font = 'bold 18px Inter';
+            // วาด Operation Report ฝั่งขวา
+            ctx.font = 'bold 28px Inter';
+            ctx.fillText('Operation Report', canvas.width - 320, yPosRight);
+            yPosRight += 35;
+            
+            // SAP No. ฝั่งขวาใต้ Operation Report (สีแดง)
+            ctx.font = 'bold 22px Inter';
+            ctx.fillText('SAP No. :', canvas.width - 320, yPosRight);
+            if (sapNo) {
+                ctx.font = '22px Inter';
+                ctx.fillStyle = '#ff0000';
+                ctx.fillText(sapNo, canvas.width - 185, yPosRight);
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 22px Inter';
+            }
+            
+            // เริ่มวาดข้อมูลซ้าย
+            ctx.font = 'bold 22px Inter';
             
             // Area
             ctx.fillText('Area :', 20, yPos);
             if (area) {
-                ctx.font = '18px Inter';
-                ctx.fillText(area, 100, yPos);
-                ctx.font = 'bold 18px Inter';
+                ctx.font = '22px Inter';
+                ctx.fillText(area, 110, yPos);
+                ctx.font = 'bold 22px Inter';
             }
-            yPos += 30;
+            yPos += 35;
             
             // Title Job
             ctx.fillText('Title job :', 20, yPos);
             if (titleJob) {
-                ctx.font = '18px Inter';
-                ctx.fillText(titleJob, 130, yPos);
-                ctx.font = 'bold 18px Inter';
+                ctx.font = '22px Inter';
+                ctx.fillText(titleJob, 145, yPos);
+                ctx.font = 'bold 22px Inter';
             }
-            yPos += 30;
-            
-            // SAP No.
-            ctx.fillText('SAP No. :', 20, yPos);
-            if (sapNo) {
-                ctx.font = '18px Inter';
-                ctx.fillText(sapNo, 120, yPos);
-                ctx.font = 'bold 18px Inter';
-            }
-            yPos += 30;
+            yPos += 35;
             
             // Date
             ctx.fillText('Date :', 20, yPos);
             if (date) {
-                ctx.font = '18px Inter';
-                ctx.fillText(date, 90, yPos);
-                ctx.font = 'bold 18px Inter';
+                ctx.font = '22px Inter';
+                ctx.fillText(date, 100, yPos);
+                ctx.font = 'bold 22px Inter';
             }
             
-            // แสดง preview ข้อความที่กำลังพิมพ์ในโหมดข้อความ
             if (currentMode === 'text') {
                 const previewText = document.getElementById('textDrawingInput').value;
                 if (previewText) {
@@ -375,7 +390,6 @@
             }
         }
 
-        // ฟังก์ชันวาดรูปทรง
         function drawShape(shape) {
             ctx.strokeStyle = '#ff0000';
             ctx.lineWidth = 3;
@@ -404,7 +418,6 @@
             }
         }
 
-        // ฟังก์ชันวาดลูกศร
         function drawArrow(fromX, fromY, toX, toY) {
             const headLength = 15;
             const angle = Math.atan2(toY - fromY, toX - fromX);
@@ -423,7 +436,6 @@
             ctx.fill();
         }
 
-        // การจัดการโหมดการวาด
         document.getElementById('modeRect').addEventListener('click', function() {
             setMode('rect', this);
         });
@@ -441,7 +453,6 @@
             document.getElementById('textDrawingInput').classList.remove('hidden');
         });
 
-        // เพิ่มการอัพเดท Canvas แบบ real-time เมื่อพิมพ์ข้อความ
         document.getElementById('textDrawingInput').addEventListener('input', function() {
             if (currentMode === 'text') {
                 redrawCanvas();
@@ -458,15 +469,15 @@
             }
         }
 
-        // เหตุการณ์การวาดบน Canvas
-        canvas.addEventListener('mousedown', (e) => {
+        // ฟังก์ชันเริ่มวาด (รองรับทั้ง mouse และ touch)
+        function handleDrawStart(e) {
+            e.preventDefault();
+            
             if (!currentMode) return;
             
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            startX = (e.clientX - rect.left) * scaleX;
-            startY = (e.clientY - rect.top) * scaleY;
+            const coords = getCanvasCoordinates(e);
+            startX = coords.x;
+            startY = coords.y;
             
             if (currentMode === 'text') {
                 const text = document.getElementById('textDrawingInput').value;
@@ -482,16 +493,17 @@
             } else {
                 isDrawing = true;
             }
-        });
+        }
 
-        canvas.addEventListener('mousemove', (e) => {
+        // ฟังก์ชันวาดระหว่างลาก (รองรับทั้ง mouse และ touch)
+        function handleDrawMove(e) {
+            e.preventDefault();
+            
             if (!isDrawing || !currentMode) return;
             
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const currentX = (e.clientX - rect.left) * scaleX;
-            const currentY = (e.clientY - rect.top) * scaleY;
+            const coords = getCanvasCoordinates(e);
+            const currentX = coords.x;
+            const currentY = coords.y;
             
             redrawCanvas();
             
@@ -512,16 +524,17 @@
                     drawArrow(startX, startY, currentX, currentY);
                     break;
             }
-        });
+        }
 
-        canvas.addEventListener('mouseup', (e) => {
+        // ฟังก์ชันจบการวาด (รองรับทั้ง mouse และ touch)
+        function handleDrawEnd(e) {
+            e.preventDefault();
+            
             if (!isDrawing || !currentMode) return;
             
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const endX = (e.clientX - rect.left) * scaleX;
-            const endY = (e.clientY - rect.top) * scaleY;
+            const coords = getCanvasCoordinates(e);
+            const endX = coords.x;
+            const endY = coords.y;
             
             shapes.push({
                 type: currentMode,
@@ -533,36 +546,47 @@
             
             isDrawing = false;
             redrawCanvas();
+        }
+
+        // เพิ่ม Event Listeners สำหรับ Mouse
+        canvas.addEventListener('mousedown', handleDrawStart);
+        canvas.addEventListener('mousemove', handleDrawMove);
+        canvas.addEventListener('mouseup', handleDrawEnd);
+        canvas.addEventListener('mouseleave', (e) => {
+            if (isDrawing) {
+                handleDrawEnd(e);
+            }
         });
 
-        // Undo
+        // เพิ่ม Event Listeners สำหรับ Touch (มือถือ/แท็บเล็ต)
+        canvas.addEventListener('touchstart', handleDrawStart);
+        canvas.addEventListener('touchmove', handleDrawMove);
+        canvas.addEventListener('touchend', handleDrawEnd);
+        canvas.addEventListener('touchcancel', handleDrawEnd);
+
         document.getElementById('btnUndo').addEventListener('click', () => {
             shapes.pop();
             redrawCanvas();
         });
 
-        // Clear all shapes
         document.getElementById('btnClear').addEventListener('click', () => {
             shapes = [];
             redrawCanvas();
         });
 
-        // โหลดรูปภาพหลัก
         document.getElementById('fileInput').addEventListener('change', (e) => {
             const files = e.target.files;
             
-            // ตรวจสอบว่าไม่เลือกรูป
             if (files.length === 0) {
                 document.getElementById('statusMessage').textContent = 'โปรดเลือกรูปภาพหลักอย่างน้อย 1 รูป (สูงสุด 3 รูป)';
                 document.getElementById('statusMessage').classList.remove('hidden');
                 return;
             }
             
-            // ตรวจสอบว่าเลือกเกิน 3 รูป
             if (files.length > 3) {
                 document.getElementById('statusMessage').textContent = 'เลือกได้สูงสุด 3 รูปเท่านั้น กรุณาเลือกใหม่';
                 document.getElementById('statusMessage').classList.remove('hidden');
-                e.target.value = ''; // ล้างการเลือกไฟล์
+                e.target.value = '';
                 return;
             }
             
@@ -570,13 +594,12 @@
             mainImages = [];
             
             let loadedCount = 0;
-            const canvasMargin = 40; // ระยะห่างจากขอบ canvas
-            const startY = 250; // ตำแหน่งเริ่มต้นแกน Y (ลดลงเพื่อให้มีพื้นที่มากขึ้น)
-            const gap = 30; // ระยะห่างระหว่างรูป
-            const maxHeight = canvas.height - startY - canvasMargin; // ความสูงสูงสุดตามพื้นที่ว่าง (ประมาณ 510px)
-            const maxWidth = canvas.width - (canvasMargin * 2); // ความกว้างสูงสุด
+            const canvasMargin = 40;
+            const startY = 250;
+            const gap = 30;
+            const maxHeight = canvas.height - startY - canvasMargin;
+            const maxWidth = canvas.width - (canvasMargin * 2);
             
-            // โหลดรูปทั้งหมดก่อน
             const tempImages = [];
             
             for (let i = 0; i < files.length; i++) {
@@ -588,7 +611,6 @@
                         loadedCount++;
                         
                         if (loadedCount === files.length) {
-                            // หาความสูงสูงสุดจากรูปทั้งหมด
                             let tallestHeight = 0;
                             const imageData = tempImages.map((img) => {
                                 const aspectRatio = img.width / img.height;
@@ -605,10 +627,8 @@
                                 };
                             });
                             
-                            // คำนวณความกว้างรวมของรูปทั้งหมด
                             let totalWidth = imageData.reduce((sum, data) => sum + data.width, 0) + (gap * (files.length - 1));
                             
-                            // ถ้ากว้างเกิน ให้ปรับขนาดลง
                             if (totalWidth > maxWidth) {
                                 const scaleFactor = maxWidth / totalWidth;
                                 imageData.forEach(data => {
@@ -618,10 +638,8 @@
                                 totalWidth = maxWidth;
                             }
                             
-                            // คำนวณตำแหน่งเริ่มต้นให้รูปอยู่กึ่งกลาง
                             let currentX = (canvas.width - totalWidth) / 2;
                             
-                            // วางรูปทั้งหมด
                             imageData.forEach((data) => {
                                 mainImages.push({
                                     image: data.image,
@@ -643,38 +661,31 @@
             }
         });
 
-        // บันทึกภาพ
         document.getElementById('saveButton').addEventListener('click', () => {
             const saveButton = document.getElementById('saveButton');
             const saveButtonContent = document.getElementById('saveButtonContent');
             
-            // แสดง loading
             saveButton.disabled = true;
             saveButtonContent.innerHTML = '<span class="loader"></span>กำลังบันทึก...';
             
             setTimeout(() => {
                 try {
-                    // สร้าง canvas ใหม่สำหรับ export
                     const exportCanvas = document.createElement('canvas');
                     exportCanvas.width = canvas.width;
                     exportCanvas.height = canvas.height;
                     const exportCtx = exportCanvas.getContext('2d');
                     
-                    // คัดลอกเนื้อหาจาก canvas หลัก
                     exportCtx.drawImage(canvas, 0, 0);
                     
-                    // สร้างลิงก์ดาวน์โหลด
                     const link = document.createElement('a');
                     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
                     link.download = `Operation_Report_${timestamp}.png`;
                     link.href = exportCanvas.toDataURL('image/png', 1.0);
                     
-                    // คลิกลิงก์เพื่อดาวน์โหลด
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                     
-                    // รีเซ็ตปุ่ม
                     saveButtonContent.innerHTML = '<i class="fas fa-check mr-2"></i>บันทึกสำเร็จ!';
                     setTimeout(() => {
                         saveButtonContent.innerHTML = '<i class="fas fa-save mr-2"></i>Save Report (PNG)';
@@ -691,19 +702,13 @@
             }, 300);
         });
 
-        // อัพเดทข้อมูล Template แบบ real-time
         document.getElementById('areaInput').addEventListener('input', redrawCanvas);
         document.getElementById('titleJopInput').addEventListener('input', redrawCanvas);
         document.getElementById('sapNoInput').addEventListener('input', redrawCanvas);
         document.getElementById('dateInput').addEventListener('change', redrawCanvas);
         
-        // ตั้งค่าวันที่เป็นวันปัจจุบัน
         document.getElementById('dateInput').valueAsDate = new Date();
         
-        // วาด Canvas เริ่มต้น
-        redrawCanvas();
-        
-        // วาด Canvas เริ่มต้น
         redrawCanvas();
     </script>
 </body>
