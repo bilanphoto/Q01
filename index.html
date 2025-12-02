@@ -33,8 +33,10 @@
             margin-bottom: 4px;
         }
         .input-group input[type="text"],
+        .input-group input[type="number"],
         .input-group input[type="date"],
-        .input-group input[type="file"] {
+        .input-group input[type="file"],
+        .input-group select {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #d1d5db;
@@ -43,13 +45,18 @@
             color: #1f2937;
             transition: border-color 0.2s;
         }
-        .input-group input:focus {
+        .input-group input:focus,
+        .input-group select:focus {
             outline: none;
             border-color: #3b82f6;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
         .input-group input[type="file"] {
             padding: 8px;
+            cursor: pointer;
+        }
+        .input-group select {
+            background-color: #ffffff;
             cursor: pointer;
         }
         #imageCanvas {
@@ -207,19 +214,28 @@
         </h1>
 
         <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4 rounded-md">
-            <h2 class="text-lg font-semibold text-blue-800 mb-2">เลือกข้อมูลพื้นฐาน (Template):</h2>
+            <h2 class="text-lg font-semibold text-blue-800 mb-2">กรอกข้อมูล :</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 input-grid">
                 <div class="input-group">
                     <label for="areaInput" class="block text-sm">Area :</label>
-                    <input type="text" id="areaInput" placeholder="กรอก Area">
+                    <select id="areaInput">
+                        <option value="">-- เลือก Area --</option>
+                        <option value="GSP1">GSP1</option>
+                        <option value="GSP2">GSP2</option>
+                        <option value="GSP3">GSP3</option>
+                        <option value="GSP5">GSP5</option>
+                        <option value="GSP6">GSP6</option>
+                        <option value="ESP">ESP</option>
+                        <option value="TANK FARM">TANK FARM</option>
+                    </select>
                 </div>
                 <div class="input-group">
-                    <label for="titleJopInput" class="block text-sm">Title job :</label>
-                    <input type="text" id="titleJopInput" placeholder="กรอก Title job">
+                    <label for="titleJopInput" class="block text-sm">Job description :</label>
+                    <input type="text" id="titleJopInput" placeholder="กรอก Job description">
                 </div>
                 <div class="input-group">
                     <label for="sapNoInput" class="block text-sm">SAP No. :</label>
-                    <input type="text" id="sapNoInput" placeholder="กรอก SAP No.">
+                    <input type="text" id="sapNoInput" inputmode="numeric" pattern="[0-9]*" placeholder="กรอกเฉพาะตัวเลข">
                 </div>
                 <div class="input-group">
                     <label for="dateInput" class="block text-sm">Date :</label>
@@ -229,9 +245,10 @@
         </div>
 
         <div class="bg-gray-50 border-l-4 border-gray-400 p-4 mb-4 rounded-md">
-            <h2 class="text-lg font-semibold text-gray-800 mb-2">เลือกข้อมูลรูปภาพ:</h2>
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">
+                เลือกรูปภาพ : <span class="text-sm font-normal text-gray-600">(เลือกได้สูงสุด 3 รูป)</span>
+            </h2>
             <div class="input-group">
-                <label for="fileInput" class="block text-sm mb-1">รูปภาพหลัก: (เลือกได้สูงสุด 3 รูป)</label>
                 <input type="file" id="fileInput" multiple accept="image/*" class="file-input-custom">
             </div>
             <p id="statusMessage" class="text-red-500 mt-2 hidden">โปรดเลือกรูปภาพหลักอย่างน้อย 1 รูป (สูงสุด 3 รูป)</p>
@@ -239,7 +256,7 @@
 
 
         <div class="canvas-area bg-gray-100 rounded-lg p-2 relative">
-            <h2 class="text-xl font-semibold text-gray-800 mb-3 text-center">ตัวอย่างผลลัพธ์บนพื้นที่ Canvas</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-3 text-center">ตัวอย่าง Report</h2>
             <canvas id="imageCanvas" class="rounded-md shadow-inner"></canvas>
 
             <div class="drawing-controls mt-4 p-3 bg-white rounded-lg shadow-sm">
@@ -363,10 +380,10 @@
             yPos += 35;
             
             // Title Job
-            ctx.fillText('Title job :', 20, yPos);
+            ctx.fillText('Job description :', 20, yPos);
             if (titleJob) {
                 ctx.font = '22px Inter';
-                ctx.fillText(titleJob, 145, yPos);
+                ctx.fillText(titleJob, 200, yPos);
                 ctx.font = 'bold 22px Inter';
             }
             yPos += 35;
@@ -702,9 +719,13 @@
             }, 300);
         });
 
-        document.getElementById('areaInput').addEventListener('input', redrawCanvas);
+        document.getElementById('areaInput').addEventListener('change', redrawCanvas);
         document.getElementById('titleJopInput').addEventListener('input', redrawCanvas);
-        document.getElementById('sapNoInput').addEventListener('input', redrawCanvas);
+        document.getElementById('sapNoInput').addEventListener('input', function(e) {
+            // กรองให้เหลือเฉพาะตัวเลข
+            this.value = this.value.replace(/[^0-9]/g, '');
+            redrawCanvas();
+        });
         document.getElementById('dateInput').addEventListener('change', redrawCanvas);
         
         document.getElementById('dateInput').valueAsDate = new Date();
