@@ -570,12 +570,11 @@
             mainImages = [];
             
             let loadedCount = 0;
-            const startX = 30; // ระยะขอบซ้าย
-            const endX = canvas.width - 30; // ระยะขอบขวา
-            const startY = 300; // ตำแหน่งเริ่มต้นแกน Y
-            const availableWidth = endX - startX; // พื้นที่ที่ใช้ได้
-            const gap = 20; // ระยะห่างระหว่างรูป
-            const maxHeight = 450; // ความสูงสูงสุด
+            const canvasMargin = 40; // ระยะห่างจากขอบ canvas
+            const startY = 250; // ตำแหน่งเริ่มต้นแกน Y (ลดลงเพื่อให้มีพื้นที่มากขึ้น)
+            const gap = 30; // ระยะห่างระหว่างรูป
+            const maxHeight = canvas.height - startY - canvasMargin; // ความสูงสูงสุดตามพื้นที่ว่าง (ประมาณ 510px)
+            const maxWidth = canvas.width - (canvasMargin * 2); // ความกว้างสูงสุด
             
             // โหลดรูปทั้งหมดก่อน
             const tempImages = [];
@@ -589,41 +588,50 @@
                         loadedCount++;
                         
                         if (loadedCount === files.length) {
-                            // คำนวณขนาดรูปทั้งหมด
-                            const totalGaps = (files.length - 1) * gap;
-                            const widthPerImage = (availableWidth - totalGaps) / files.length;
-                            
-                            let currentX = startX;
-                            
-                            tempImages.forEach((img) => {
-                                // คำนวณขนาดตามอัตราส่วน
+                            // หาความสูงสูงสุดจากรูปทั้งหมด
+                            let tallestHeight = 0;
+                            const imageData = tempImages.map((img) => {
                                 const aspectRatio = img.width / img.height;
-                                let displayWidth = widthPerImage;
-                                let displayHeight = displayWidth / aspectRatio;
+                                let displayHeight = maxHeight;
+                                let displayWidth = displayHeight * aspectRatio;
                                 
-                                // ถ้าสูงเกินให้ปรับตามความสูง
-                                if (displayHeight > maxHeight) {
-                                    displayHeight = maxHeight;
-                                    displayWidth = displayHeight * aspectRatio;
-                                    // ถ้ากว้างเกินพื้นที่ให้ปรับลง
-                                    if (displayWidth > widthPerImage) {
-                                        displayWidth = widthPerImage;
-                                        displayHeight = displayWidth / aspectRatio;
-                                    }
-                                }
+                                tallestHeight = Math.max(tallestHeight, displayHeight);
                                 
-                                // จัดให้อยู่กลางแนวตั้ง
-                                const offsetY = (maxHeight - displayHeight) / 2;
-                                
-                                mainImages.push({
+                                return {
                                     image: img,
-                                    x: currentX + (widthPerImage - displayWidth) / 2, // จัดกลางในพื้นที่
-                                    y: startY + offsetY,
+                                    aspectRatio: aspectRatio,
                                     width: displayWidth,
                                     height: displayHeight
+                                };
+                            });
+                            
+                            // คำนวณความกว้างรวมของรูปทั้งหมด
+                            let totalWidth = imageData.reduce((sum, data) => sum + data.width, 0) + (gap * (files.length - 1));
+                            
+                            // ถ้ากว้างเกิน ให้ปรับขนาดลง
+                            if (totalWidth > maxWidth) {
+                                const scaleFactor = maxWidth / totalWidth;
+                                imageData.forEach(data => {
+                                    data.width = data.width * scaleFactor;
+                                    data.height = data.height * scaleFactor;
+                                });
+                                totalWidth = maxWidth;
+                            }
+                            
+                            // คำนวณตำแหน่งเริ่มต้นให้รูปอยู่กึ่งกลาง
+                            let currentX = (canvas.width - totalWidth) / 2;
+                            
+                            // วางรูปทั้งหมด
+                            imageData.forEach((data) => {
+                                mainImages.push({
+                                    image: data.image,
+                                    x: currentX,
+                                    y: startY,
+                                    width: data.width,
+                                    height: data.height
                                 });
                                 
-                                currentX += widthPerImage + gap;
+                                currentX += data.width + gap;
                             });
                             
                             redrawCanvas();
