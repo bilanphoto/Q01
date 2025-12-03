@@ -716,19 +716,26 @@
             let yPos = 40;
             let yPosRight = 40;
             
-            // วาด Operation Report ฝั่งขวา (ชิดขวา ห่างขอบ 20px)
-            ctx.font = 'bold 36px Inter';
+            // วาดข้อความฝั่งขวา (ชิดขวา ห่างขอบ 20px)
             ctx.textAlign = 'right';
-            ctx.fillText('Operation Report', canvas.width - 20, yPosRight);
-            yPosRight += 35;
             
-            // SAP No. ฝั่งขวาใต้ Operation Report
-            ctx.font = 'bold 22px Inter';
+            // บรรทัดที่ 1: "Operation"
+            ctx.font = 'bold 48px Inter';
+            ctx.fillText('Operation', canvas.width - 20, yPosRight);
+            yPosRight += 55;
+            
+            // บรรทัดที่ 2: "Report"
+            ctx.font = 'bold 48px Inter';
+            ctx.fillText('Report', canvas.width - 20, yPosRight);
+            yPosRight += 60;
+            
+            // บรรทัดที่ 3: SAP No. และตัวเลข
+            ctx.font = 'bold 28px Inter';
             ctx.fillStyle = '#000000';
             
             if (sapNo) {
                 // วัดความกว้างของตัวเลข SAP
-                ctx.font = '22px Inter';
+                ctx.font = '28px Inter';
                 ctx.fillStyle = '#ff0000';
                 const sapNumberWidth = ctx.measureText(sapNo).width;
                 
@@ -736,7 +743,7 @@
                 ctx.fillText(sapNo, canvas.width - 20, yPosRight);
                 
                 // วาด "SAP No. :" อยู่ซ้ายของตัวเลข
-                ctx.font = 'bold 22px Inter';
+                ctx.font = 'bold 28px Inter';
                 ctx.fillStyle = '#000000';
                 ctx.fillText('SAP No. :', canvas.width - 20 - sapNumberWidth - 10, yPosRight);
             } else {
