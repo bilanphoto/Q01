@@ -653,9 +653,9 @@
             
             // วาดรูปโลโก้ (ถ้ามี) - อยู่ทางขวาสุด กึ่งกลางระหว่างบรรทัด Operation Report และ SAP
             if (logoImage) {
-                // คำนวณขนาดโลโก้ (ปรับขนาดตามต้องการ)
-                const logoMaxWidth = 200; // ความกว้างสูงสุดของโลโก้
-                const logoMaxHeight = 100; // ความสูงสูงสุดของโลโก้
+                // คำนวณขนาดโลโก้ (ปรับขนาดเป็น 0.8 เท่าของเดิม)
+                const logoMaxWidth = 160; // ความกว้างสูงสุดของโลโก้ (200 * 0.8)
+                const logoMaxHeight = 80; // ความสูงสูงสุดของโลโก้ (100 * 0.8)
                 const logoRatio = logoImage.width / logoImage.height;
                 
                 let logoWidth, logoHeight;
@@ -722,7 +722,7 @@
             const operationY = yPosRight;
             
             // คำนวณตำแหน่งของโลโก้
-            let logoWidth = 200; // ความกว้างโลโก้
+            let logoWidth = 160; // ความกว้างโลโก้ (ลดเป็น 0.8 เท่า)
             let logoRightMargin = 20; // ระยะห่างโลโก้จากขอบขวา
             let textLogoGap = 20; // ระยะห่างระหว่างข้อความกับโลโก้
             
