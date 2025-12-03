@@ -651,7 +651,7 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
             
-            // วาดรูปโลโก้ (ถ้ามี) - อยู่ทางขวาสุด กึ่งกลางแนวตั้ง
+            // วาดรูปโลโก้ (ถ้ามี) - อยู่ทางขวาสุด กึ่งกลางระหว่างบรรทัด Operation Report และ SAP
             if (logoImage) {
                 // คำนวณขนาดโลโก้ (ปรับขนาดตามต้องการ)
                 const logoMaxWidth = 200; // ความกว้างสูงสุดของโลโก้
@@ -667,12 +667,11 @@
                     logoWidth = logoMaxHeight * logoRatio;
                 }
                 
-                // วาดโลโก้ที่มุมขวาบน และกึ่งกลางแนวตั้ง
+                // วาดโลโก้ที่มุมขวา และกึ่งกลางระหว่างสองบรรทัด
                 const logoX = canvas.width - logoWidth - 20; // ห่างขอบขวา 20px
                 
-                // คำนวณตำแหน่ง Y ให้อยู่กึ่งกลางของพื้นที่ข้อความ (Operation Report + SAP)
-                const textAreaHeight = 85; // ความสูงรวมของ Operation Report และ SAP (40 + 45)
-                const logoY = 20 + (textAreaHeight - logoHeight) / 2; // กึ่งกลางแนวตั้ง
+                // ใช้ตำแหน่งกึ่งกลางที่คำนวณไว้แล้ว โดยให้โลโก้อยู่กึ่งกลางพอดี
+                const logoY = (window.logoMiddleY || 60) - (logoHeight / 2);
                 
                 // เพิ่มความโปร่งใสให้โลโก้เล็กน้อย (ถ้าต้องการ)
                 ctx.globalAlpha = 0.9;
@@ -719,6 +718,9 @@
             let yPos = 40;
             let yPosRight = 40;
             
+            // เก็บตำแหน่ง Y ของบรรทัดแรก (Operation Report)
+            const operationY = yPosRight;
+            
             // คำนวณตำแหน่งของโลโก้ (เพื่อวางข้อความทางซ้ายของโลโก้)
             let logoWidth = 200; // ความกว้างโลโก้ (เดิม)
             let textRightMargin = canvas.width - logoWidth - 40; // ข้อความอยู่ทางซ้ายของโลโก้
@@ -728,6 +730,9 @@
             ctx.textAlign = 'right';
             ctx.fillText('Operation Report', textRightMargin, yPosRight);
             yPosRight += 45;
+            
+            // เก็บตำแหน่ง Y ของบรรทัดที่สอง (SAP No.)
+            const sapY = yPosRight;
             
             // SAP No. อยู่ด้านล่าง Operation Report
             ctx.font = 'bold 22px Inter';
@@ -750,6 +755,9 @@
                 // ถ้าไม่มีตัวเลข SAP ให้แสดงแค่ label
                 ctx.fillText('SAP No. :', textRightMargin, yPosRight);
             }
+            
+            // คำนวณตำแหน่งกึ่งกลางระหว่างสองบรรทัดสำหรับโลโก้
+            window.logoMiddleY = (operationY + sapY) / 2;
             
             // รีเซ็ต textAlign กลับเป็นซ้ายสำหรับข้อมูลฝั่งซ้าย
             ctx.textAlign = 'left';
