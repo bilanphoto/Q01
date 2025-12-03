@@ -716,39 +716,36 @@
             let yPos = 40;
             let yPosRight = 40;
             
-            // วาดข้อความฝั่งขวา (ชิดขวา ห่างขอบ 20px)
+            // คำนวณตำแหน่งของโลโก้ (เพื่อวางข้อความทางซ้ายของโลโก้)
+            let logoWidth = 200; // ความกว้างโลโก้ (เดิม)
+            let textRightMargin = canvas.width - logoWidth - 40; // ข้อความอยู่ทางซ้ายของโลโก้
+            
+            // วาด Operation Report ทางซ้ายของโลโก้
+            ctx.font = 'bold 36px Inter';
             ctx.textAlign = 'right';
+            ctx.fillText('Operation Report', textRightMargin, yPosRight);
+            yPosRight += 45;
             
-            // บรรทัดที่ 1: "Operation"
-            ctx.font = 'bold 48px Inter';
-            ctx.fillText('Operation', canvas.width - 20, yPosRight);
-            yPosRight += 55;
-            
-            // บรรทัดที่ 2: "Report"
-            ctx.font = 'bold 48px Inter';
-            ctx.fillText('Report', canvas.width - 20, yPosRight);
-            yPosRight += 60;
-            
-            // บรรทัดที่ 3: SAP No. และตัวเลข
-            ctx.font = 'bold 28px Inter';
+            // SAP No. อยู่ด้านล่าง Operation Report
+            ctx.font = 'bold 22px Inter';
             ctx.fillStyle = '#000000';
             
             if (sapNo) {
                 // วัดความกว้างของตัวเลข SAP
-                ctx.font = '28px Inter';
+                ctx.font = '22px Inter';
                 ctx.fillStyle = '#ff0000';
                 const sapNumberWidth = ctx.measureText(sapNo).width;
                 
-                // วาดตัวเลข SAP (สีแดง) ชิดขวา
-                ctx.fillText(sapNo, canvas.width - 20, yPosRight);
+                // วาดตัวเลข SAP (สีแดง) 
+                ctx.fillText(sapNo, textRightMargin, yPosRight);
                 
                 // วาด "SAP No. :" อยู่ซ้ายของตัวเลข
-                ctx.font = 'bold 28px Inter';
+                ctx.font = 'bold 22px Inter';
                 ctx.fillStyle = '#000000';
-                ctx.fillText('SAP No. :', canvas.width - 20 - sapNumberWidth - 10, yPosRight);
+                ctx.fillText('SAP No. :', textRightMargin - sapNumberWidth - 10, yPosRight);
             } else {
                 // ถ้าไม่มีตัวเลข SAP ให้แสดงแค่ label
-                ctx.fillText('SAP No. :', canvas.width - 20, yPosRight);
+                ctx.fillText('SAP No. :', textRightMargin, yPosRight);
             }
             
             // รีเซ็ต textAlign กลับเป็นซ้ายสำหรับข้อมูลฝั่งซ้าย
