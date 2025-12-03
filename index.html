@@ -139,10 +139,6 @@
             gap: 20px;
         }
         
-        .input-grid .input-group:nth-child(5) {
-            grid-column: span 2;
-        }
-        
         .input-group {
             display: flex;
             flex-direction: column;
@@ -479,9 +475,9 @@
             </h2>
             <div class="input-grid">
                 <div class="input-group">
-                    <label for="areaInput">Area</label>
+                    <label for="areaInput">Plant</label>
                     <select id="areaInput">
-                        <option value="">-- เลือก Area --</option>
+                        <option value="">-- เลือก Plant --</option>
                         <option value="GSP1">GSP1</option>
                         <option value="GSP2">GSP2</option>
                         <option value="GSP3">GSP3</option>
@@ -490,6 +486,10 @@
                         <option value="ESP">ESP</option>
                         <option value="TANK FARM">TANK FARM</option>
                     </select>
+                </div>
+                <div class="input-group">
+                    <label for="areaTextInput">Area</label>
+                    <input type="text" id="areaTextInput" placeholder="กรอก Area">
                 </div>
                 <div class="input-group">
                     <label for="titleJobInput">Title job</label>
@@ -655,10 +655,20 @@
 
         function drawTemplateData() {
             const area = document.getElementById('areaInput').value;
+            const areaText = document.getElementById('areaTextInput').value;
             const titleJob = document.getElementById('titleJobInput').value;
             const jobDescription = document.getElementById('titleJopInput').value;
             const sapNo = document.getElementById('sapNoInput').value;
-            const date = document.getElementById('dateInput').value;
+            const dateValue = document.getElementById('dateInput').value;
+            
+            // แปลงวันที่จาก YYYY-MM-DD เป็น DD/MM/YYYY
+            let date = '';
+            if (dateValue) {
+                const dateParts = dateValue.split('-');
+                if (dateParts.length === 3) {
+                    date = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+                }
+            }
 
             ctx.fillStyle = '#000000';
             
@@ -699,11 +709,23 @@
             // เริ่มวาดข้อมูลซ้าย
             ctx.font = 'bold 22px Inter';
             
-            // Area
-            ctx.fillText('Area :', 20, yPos);
+            // Plant และ Area (บรรทัดเดียวกัน)
+            ctx.fillText('Plant :', 20, yPos);
+            let xPos = 110;
             if (area) {
                 ctx.font = '22px Inter';
-                ctx.fillText(area, 110, yPos);
+                ctx.fillText(area, xPos, yPos);
+                xPos += ctx.measureText(area).width + 20; // เว้นระยะ 20px
+                ctx.font = 'bold 22px Inter';
+            }
+            
+            // แสดง Area ต่อท้าย Plant
+            if (areaText) {
+                ctx.font = 'bold 22px Inter';
+                ctx.fillText('Area :', xPos, yPos);
+                xPos += ctx.measureText('Area :').width + 10;
+                ctx.font = '22px Inter';
+                ctx.fillText(areaText, xPos, yPos);
                 ctx.font = 'bold 22px Inter';
             }
             yPos += 35;
@@ -1030,9 +1052,22 @@
                     
                     exportCtx.drawImage(canvas, 0, 0);
                     
+                    // สร้างชื่อไฟล์จากข้อมูลที่กรอก
+                    const plant = document.getElementById('areaInput').value || 'NoPlant';
+                    const areaText = document.getElementById('areaTextInput').value || 'NoArea';
+                    const now = new Date();
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const year = now.getFullYear();
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    const seconds = String(now.getSeconds()).padStart(2, '0');
+                    
+                    // สร้างชื่อไฟล์: Plant_Area_DD-MM-YYYY_HH-MM-SS
+                    const fileName = `${plant}_${areaText}_${day}-${month}-${year}_${hours}-${minutes}-${seconds}.png`;
+                    
                     const link = document.createElement('a');
-                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
-                    link.download = `Operation_Report_${timestamp}.png`;
+                    link.download = fileName;
                     link.href = exportCanvas.toDataURL('image/png', 1.0);
                     
                     document.body.appendChild(link);
@@ -1056,6 +1091,7 @@
         });
 
         document.getElementById('areaInput').addEventListener('change', redrawCanvas);
+        document.getElementById('areaTextInput').addEventListener('input', redrawCanvas);
         document.getElementById('titleJobInput').addEventListener('input', redrawCanvas);
         document.getElementById('titleJopInput').addEventListener('input', redrawCanvas);
         document.getElementById('sapNoInput').addEventListener('input', function(e) {
