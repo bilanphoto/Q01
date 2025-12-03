@@ -721,9 +721,13 @@
             // เก็บตำแหน่ง Y ของบรรทัดแรก (Operation Report)
             const operationY = yPosRight;
             
-            // คำนวณตำแหน่งของโลโก้ (เพื่อวางข้อความทางซ้ายของโลโก้)
-            let logoWidth = 200; // ความกว้างโลโก้ (เดิม)
-            let textRightMargin = canvas.width - logoWidth - 40; // ข้อความอยู่ทางซ้ายของโลโก้
+            // คำนวณตำแหน่งของโลโก้
+            let logoWidth = 200; // ความกว้างโลโก้
+            let logoRightMargin = 20; // ระยะห่างโลโก้จากขอบขวา
+            let textLogoGap = 20; // ระยะห่างระหว่างข้อความกับโลโก้
+            
+            // ข้อความอยู่ทางซ้ายของโลโก้ โดยเว้นระยะ textLogoGap
+            let textRightMargin = canvas.width - logoWidth - logoRightMargin - textLogoGap;
             
             // วาด Operation Report ทางซ้ายของโลโก้
             ctx.font = 'bold 36px Inter';
