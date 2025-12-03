@@ -721,13 +721,13 @@
             
             // คำนวณพื้นที่สำหรับโลโก้ (เว้นที่ให้โลโก้ก่อน)
             const logoEstimatedHeight = 80; // ความสูงโลโก้โดยประมาณ
-            yPosRight += logoEstimatedHeight + 15; // เว้นที่สำหรับโลโก้ + ระยะห่าง
+            yPosRight += logoEstimatedHeight + 20; // เว้นที่สำหรับโลโก้ + ระยะห่าง 20px
             
             // วาด Operation Report ใต้โลโก้
             ctx.font = 'bold 36px Inter';
             ctx.textAlign = 'right';
             ctx.fillText('Operation Report', canvas.width - 20, yPosRight);
-            yPosRight += 45;
+            yPosRight += 50; // เพิ่มระยะห่างระหว่าง Operation Report และ SAP No.
             
             // SAP No. อยู่ด้านล่าง Operation Report
             ctx.font = 'bold 22px Inter';
