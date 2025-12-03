@@ -651,7 +651,7 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
             
-            // วาดรูปโลโก้ (ถ้ามี) - อยู่หลังข้อความ Operation Report
+            // วาดรูปโลโก้ (ถ้ามี) - อยู่ทางขวาสุด กึ่งกลางแนวตั้ง
             if (logoImage) {
                 // คำนวณขนาดโลโก้ (ปรับขนาดตามต้องการ)
                 const logoMaxWidth = 200; // ความกว้างสูงสุดของโลโก้
@@ -667,9 +667,12 @@
                     logoWidth = logoMaxHeight * logoRatio;
                 }
                 
-                // วาดโลโก้ที่มุมขวาบน (เหนือ Operation Report เล็กน้อย)
+                // วาดโลโก้ที่มุมขวาบน และกึ่งกลางแนวตั้ง
                 const logoX = canvas.width - logoWidth - 20; // ห่างขอบขวา 20px
-                const logoY = 20; // ห่างขอบบน 20px
+                
+                // คำนวณตำแหน่ง Y ให้อยู่กึ่งกลางของพื้นที่ข้อความ (Operation Report + SAP)
+                const textAreaHeight = 85; // ความสูงรวมของ Operation Report และ SAP (40 + 45)
+                const logoY = 20 + (textAreaHeight - logoHeight) / 2; // กึ่งกลางแนวตั้ง
                 
                 // เพิ่มความโปร่งใสให้โลโก้เล็กน้อย (ถ้าต้องการ)
                 ctx.globalAlpha = 0.9;
