@@ -351,21 +351,36 @@
             let yPos = 40;
             let yPosRight = 40;
             
-            // วาด Operation Report ฝั่งขวา
+            // วาด Operation Report ฝั่งขวา (ชิดขวา ห่างขอบ 20px)
             ctx.font = 'bold 28px Inter';
-            ctx.fillText('Operation Report', canvas.width - 320, yPosRight);
+            ctx.textAlign = 'right';
+            ctx.fillText('Operation Report', canvas.width - 20, yPosRight);
             yPosRight += 35;
             
-            // SAP No. ฝั่งขวาใต้ Operation Report (สีแดง)
+            // SAP No. ฝั่งขวาใต้ Operation Report
             ctx.font = 'bold 22px Inter';
-            ctx.fillText('SAP No. :', canvas.width - 320, yPosRight);
+            ctx.fillStyle = '#000000';
+            
             if (sapNo) {
+                // วัดความกว้างของตัวเลข SAP
                 ctx.font = '22px Inter';
                 ctx.fillStyle = '#ff0000';
-                ctx.fillText(sapNo, canvas.width - 185, yPosRight);
-                ctx.fillStyle = '#000000';
+                const sapNumberWidth = ctx.measureText(sapNo).width;
+                
+                // วาดตัวเลข SAP (สีแดง) ชิดขวา
+                ctx.fillText(sapNo, canvas.width - 20, yPosRight);
+                
+                // วาด "SAP No. :" อยู่ซ้ายของตัวเลข
                 ctx.font = 'bold 22px Inter';
+                ctx.fillStyle = '#000000';
+                ctx.fillText('SAP No. :', canvas.width - 20 - sapNumberWidth - 10, yPosRight);
+            } else {
+                // ถ้าไม่มีตัวเลข SAP ให้แสดงแค่ label
+                ctx.fillText('SAP No. :', canvas.width - 20, yPosRight);
             }
+            
+            // รีเซ็ต textAlign กลับเป็นซ้ายสำหรับข้อมูลฝั่งซ้าย
+            ctx.textAlign = 'left';
             
             // เริ่มวาดข้อมูลซ้าย
             ctx.font = 'bold 22px Inter';
@@ -395,21 +410,11 @@
                 ctx.fillText(date, 100, yPos);
                 ctx.font = 'bold 22px Inter';
             }
-            
-            if (currentMode === 'text') {
-                const previewText = document.getElementById('textDrawingInput').value;
-                if (previewText) {
-                    ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-                    ctx.font = 'bold 24px Inter';
-                    ctx.fillText(`Preview: ${previewText}`, canvas.width / 2 - 100, 50);
-                    ctx.fillStyle = '#000000';
-                }
-            }
         }
 
         function drawShape(shape) {
             ctx.strokeStyle = '#ff0000';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 6;
             ctx.fillStyle = 'rgba(255, 0, 0, 0.1)';
 
             switch (shape.type) {
@@ -428,8 +433,23 @@
                     drawArrow(shape.x, shape.y, shape.x + shape.width, shape.y + shape.height);
                     break;
                 case 'text':
-                    ctx.fillStyle = '#ff0000';
+                    // วัดขนาดข้อความ
                     ctx.font = 'bold 24px Inter';
+                    const textMetrics = ctx.measureText(shape.text);
+                    const textHeight = 24; // ขนาดฟอนต์
+                    const padding = 5;
+                    
+                    // วาดพื้นหลังสีขาว
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(
+                        shape.x - padding, 
+                        shape.y - textHeight, 
+                        textMetrics.width + (padding * 2), 
+                        textHeight + (padding * 2)
+                    );
+                    
+                    // วาดข้อความสีแดง
+                    ctx.fillStyle = '#ff0000';
                     ctx.fillText(shape.text, shape.x, shape.y);
                     break;
             }
@@ -525,7 +545,7 @@
             redrawCanvas();
             
             ctx.strokeStyle = '#ff0000';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 6;
             
             switch (currentMode) {
                 case 'rect':
