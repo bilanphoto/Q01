@@ -139,6 +139,10 @@
             gap: 20px;
         }
         
+        .input-grid .input-group:nth-child(5) {
+            grid-column: span 2;
+        }
+        
         .input-group {
             display: flex;
             flex-direction: column;
@@ -488,6 +492,10 @@
                     </select>
                 </div>
                 <div class="input-group">
+                    <label for="titleJobInput">Title job</label>
+                    <input type="text" id="titleJobInput" placeholder="กรอก Title job">
+                </div>
+                <div class="input-group">
                     <label for="titleJopInput">Job Description</label>
                     <input type="text" id="titleJopInput" placeholder="กรอก Job description">
                 </div>
@@ -570,9 +578,26 @@
         let currentMode = null;
         let shapes = [];
         let mainImages = [];
+        let backgroundImage = null; // เก็บภาพพื้นหลัง
 
         canvas.width = 1200;
         canvas.height = 800;
+        
+        // โหลดภาพพื้นหลัง
+        function loadBackgroundImage() {
+            const bgImg = new Image();
+            bgImg.onload = function() {
+                backgroundImage = bgImg;
+                redrawCanvas();
+            };
+            bgImg.onerror = function() {
+                console.warn('ไม่สามารถโหลดภาพพื้นหลัง pttp.png ได้');
+            };
+            bgImg.src = 'pttp.png'; // ชื่อไฟล์ภาพพื้นหลัง
+        }
+        
+        // เรียกใช้ฟังก์ชันโหลดภาพพื้นหลัง
+        loadBackgroundImage();
 
         function getCanvasCoordinates(e) {
             const rect = canvas.getBoundingClientRect();
@@ -601,8 +626,15 @@
         function redrawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            ctx.fillStyle = '#F5F5F5';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // วาดภาพพื้นหลังก่อน (ถ้ามี)
+            if (backgroundImage) {
+                // วาดภาพพื้นหลังให้เต็ม canvas
+                ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+            } else {
+                // ถ้าไม่มีภาพพื้นหลัง ใช้สีเทาอ่อนแทน
+                ctx.fillStyle = '#F5F5F5';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
             
             mainImages.forEach(img => {
                 ctx.save();
@@ -623,7 +655,8 @@
 
         function drawTemplateData() {
             const area = document.getElementById('areaInput').value;
-            const titleJob = document.getElementById('titleJopInput').value;
+            const titleJob = document.getElementById('titleJobInput').value;
+            const jobDescription = document.getElementById('titleJopInput').value;
             const sapNo = document.getElementById('sapNoInput').value;
             const date = document.getElementById('dateInput').value;
 
@@ -675,11 +708,24 @@
             }
             yPos += 35;
             
-            // Job description
-            ctx.fillText('Job description :', 20, yPos);
+            // Title job
+            ctx.fillText('Title job :', 20, yPos);
             if (titleJob) {
                 ctx.font = '22px Inter';
-                ctx.fillText(titleJob, 200, yPos);
+                ctx.fillText(titleJob, 145, yPos);
+                ctx.font = 'bold 22px Inter';
+            }
+            yPos += 35;
+            
+            // Job description (คำนวณตำแหน่งให้มีช่องว่างเท่า Title job)
+            ctx.font = 'bold 22px Inter';
+            const jobDescLabel = 'Job description :';
+            const jobDescLabelWidth = ctx.measureText(jobDescLabel).width;
+            ctx.fillText(jobDescLabel, 20, yPos);
+            if (jobDescription) {
+                ctx.font = '22px Inter';
+                // เว้นระยะจากขอบซ้าย 20 + ความกว้าง label + ช่องว่าง 10px
+                ctx.fillText(jobDescription, 20 + jobDescLabelWidth + 10, yPos);
                 ctx.font = 'bold 22px Inter';
             }
             yPos += 35;
@@ -1010,6 +1056,7 @@
         });
 
         document.getElementById('areaInput').addEventListener('change', redrawCanvas);
+        document.getElementById('titleJobInput').addEventListener('input', redrawCanvas);
         document.getElementById('titleJopInput').addEventListener('input', redrawCanvas);
         document.getElementById('sapNoInput').addEventListener('input', function(e) {
             this.value = this.value.replace(/[^0-9]/g, '');
