@@ -579,6 +579,7 @@
         let shapes = [];
         let mainImages = [];
         let backgroundImage = null; // เก็บภาพพื้นหลัง
+        let logoImage = null; // เก็บรูปโลโก้
 
         canvas.width = 1200;
         canvas.height = 800;
@@ -596,8 +597,22 @@
             bgImg.src = 'pttp.png'; // ชื่อไฟล์ภาพพื้นหลัง
         }
         
-        // เรียกใช้ฟังก์ชันโหลดภาพพื้นหลัง
+        // โหลดรูปโลโก้
+        function loadLogoImage() {
+            const logoImg = new Image();
+            logoImg.onload = function() {
+                logoImage = logoImg;
+                redrawCanvas();
+            };
+            logoImg.onerror = function() {
+                console.warn('ไม่สามารถโหลดรูปโลโก้ logoptt.png ได้');
+            };
+            logoImg.src = 'logoptt.png'; // ชื่อไฟล์รูปโลโก้
+        }
+        
+        // เรียกใช้ฟังก์ชันโหลดภาพพื้นหลังและโลโก้
         loadBackgroundImage();
+        loadLogoImage();
 
         function getCanvasCoordinates(e) {
             const rect = canvas.getBoundingClientRect();
@@ -634,6 +649,32 @@
                 // ถ้าไม่มีภาพพื้นหลัง ใช้สีเทาอ่อนแทน
                 ctx.fillStyle = '#F5F5F5';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            // วาดรูปโลโก้ (ถ้ามี) - อยู่หลังข้อความ Operation Report
+            if (logoImage) {
+                // คำนวณขนาดโลโก้ (ปรับขนาดตามต้องการ)
+                const logoMaxWidth = 200; // ความกว้างสูงสุดของโลโก้
+                const logoMaxHeight = 100; // ความสูงสูงสุดของโลโก้
+                const logoRatio = logoImage.width / logoImage.height;
+                
+                let logoWidth, logoHeight;
+                if (logoRatio > logoMaxWidth / logoMaxHeight) {
+                    logoWidth = logoMaxWidth;
+                    logoHeight = logoMaxWidth / logoRatio;
+                } else {
+                    logoHeight = logoMaxHeight;
+                    logoWidth = logoMaxHeight * logoRatio;
+                }
+                
+                // วาดโลโก้ที่มุมขวาบน (เหนือ Operation Report เล็กน้อย)
+                const logoX = canvas.width - logoWidth - 20; // ห่างขอบขวา 20px
+                const logoY = 20; // ห่างขอบบน 20px
+                
+                // เพิ่มความโปร่งใสให้โลโก้เล็กน้อย (ถ้าต้องการ)
+                ctx.globalAlpha = 0.9;
+                ctx.drawImage(logoImage, logoX, logoY, logoWidth, logoHeight);
+                ctx.globalAlpha = 1.0; // รีเซ็ตความโปร่งใส
             }
             
             mainImages.forEach(img => {
