@@ -651,7 +651,7 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
             
-            // วาดรูปโลโก้ (ถ้ามี) - อยู่ทางขวาสุด กึ่งกลางระหว่างบรรทัด Operation Report และ SAP
+            // วาดรูปโลโก้ (ถ้ามี) - อยู่ด้านบนสุด ชิดขวา
             if (logoImage) {
                 // คำนวณขนาดโลโก้ (ปรับขนาดเป็น 0.8 เท่าของเดิม)
                 const logoMaxWidth = 160; // ความกว้างสูงสุดของโลโก้ (200 * 0.8)
@@ -667,11 +667,9 @@
                     logoWidth = logoMaxHeight * logoRatio;
                 }
                 
-                // วาดโลโก้ที่มุมขวา และกึ่งกลางระหว่างสองบรรทัด
+                // วาดโลโก้ที่มุมขวาบน
                 const logoX = canvas.width - logoWidth - 20; // ห่างขอบขวา 20px
-                
-                // ใช้ตำแหน่งกึ่งกลางที่คำนวณไว้แล้ว โดยให้โลโก้อยู่กึ่งกลางพอดี
-                const logoY = (window.logoMiddleY || 60) - (logoHeight / 2);
+                const logoY = window.logoStartY || 40; // อยู่ด้านบนสุด
                 
                 // เพิ่มความโปร่งใสให้โลโก้เล็กน้อย (ถ้าต้องการ)
                 ctx.globalAlpha = 0.9;
@@ -718,25 +716,18 @@
             let yPos = 40;
             let yPosRight = 40;
             
-            // เก็บตำแหน่ง Y ของบรรทัดแรก (Operation Report)
-            const operationY = yPosRight;
+            // เก็บตำแหน่งเริ่มต้นสำหรับโลโก้ (อยู่บนสุด)
+            window.logoStartY = yPosRight;
             
-            // คำนวณตำแหน่งของโลโก้
-            let logoWidth = 160; // ความกว้างโลโก้ (ลดเป็น 0.8 เท่า)
-            let logoRightMargin = 20; // ระยะห่างโลโก้จากขอบขวา
-            let textLogoGap = 20; // ระยะห่างระหว่างข้อความกับโลโก้
+            // คำนวณพื้นที่สำหรับโลโก้ (เว้นที่ให้โลโก้ก่อน)
+            const logoEstimatedHeight = 80; // ความสูงโลโก้โดยประมาณ
+            yPosRight += logoEstimatedHeight + 15; // เว้นที่สำหรับโลโก้ + ระยะห่าง
             
-            // ข้อความอยู่ทางซ้ายของโลโก้ โดยเว้นระยะ textLogoGap
-            let textRightMargin = canvas.width - logoWidth - logoRightMargin - textLogoGap;
-            
-            // วาด Operation Report ทางซ้ายของโลโก้
+            // วาด Operation Report ใต้โลโก้
             ctx.font = 'bold 36px Inter';
             ctx.textAlign = 'right';
-            ctx.fillText('Operation Report', textRightMargin, yPosRight);
+            ctx.fillText('Operation Report', canvas.width - 20, yPosRight);
             yPosRight += 45;
-            
-            // เก็บตำแหน่ง Y ของบรรทัดที่สอง (SAP No.)
-            const sapY = yPosRight;
             
             // SAP No. อยู่ด้านล่าง Operation Report
             ctx.font = 'bold 22px Inter';
@@ -749,19 +740,16 @@
                 const sapNumberWidth = ctx.measureText(sapNo).width;
                 
                 // วาดตัวเลข SAP (สีแดง) 
-                ctx.fillText(sapNo, textRightMargin, yPosRight);
+                ctx.fillText(sapNo, canvas.width - 20, yPosRight);
                 
                 // วาด "SAP No. :" อยู่ซ้ายของตัวเลข
                 ctx.font = 'bold 22px Inter';
                 ctx.fillStyle = '#000000';
-                ctx.fillText('SAP No. :', textRightMargin - sapNumberWidth - 10, yPosRight);
+                ctx.fillText('SAP No. :', canvas.width - 20 - sapNumberWidth - 10, yPosRight);
             } else {
                 // ถ้าไม่มีตัวเลข SAP ให้แสดงแค่ label
-                ctx.fillText('SAP No. :', textRightMargin, yPosRight);
+                ctx.fillText('SAP No. :', canvas.width - 20, yPosRight);
             }
-            
-            // คำนวณตำแหน่งกึ่งกลางระหว่างสองบรรทัดสำหรับโลโก้
-            window.logoMiddleY = (operationY + sapY) / 2;
             
             // รีเซ็ต textAlign กลับเป็นซ้ายสำหรับข้อมูลฝั่งซ้าย
             ctx.textAlign = 'left';
