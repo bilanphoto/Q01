@@ -716,18 +716,15 @@
             let yPos = 40;
             let yPosRight = 40;
             
-            // เก็บตำแหน่งเริ่มต้นสำหรับโลโก้ (อยู่บนสุด)
-            window.logoStartY = yPosRight;
-            
-            // คำนวณพื้นที่สำหรับโลโก้ (เว้นที่ให้โลโก้ก่อน)
-            const logoEstimatedHeight = 80; // ความสูงโลโก้โดยประมาณ
-            yPosRight += logoEstimatedHeight + 20; // เว้นที่สำหรับโลโก้ + ระยะห่าง 20px
-            
-            // วาด Operation Report ใต้โลโก้
+            // วาด Operation Report ที่ตำแหน่งเดียวกับ Plant (บรรทัดบนสุด)
             ctx.font = 'bold 36px Inter';
             ctx.textAlign = 'right';
             ctx.fillText('Operation Report', canvas.width - 20, yPosRight);
-            yPosRight += 50; // เพิ่มระยะห่างระหว่าง Operation Report และ SAP No.
+            
+            // เก็บตำแหน่งของ Operation Report สำหรับคำนวณตำแหน่งโลโก้
+            const operationReportY = yPosRight;
+            
+            yPosRight += 50; // เว้นระยะห่างระหว่าง Operation Report และ SAP No.
             
             // SAP No. อยู่ด้านล่าง Operation Report
             ctx.font = 'bold 22px Inter';
@@ -750,6 +747,10 @@
                 // ถ้าไม่มีตัวเลข SAP ให้แสดงแค่ label
                 ctx.fillText('SAP No. :', canvas.width - 20, yPosRight);
             }
+            
+            // คำนวณตำแหน่งโลโก้ให้อยู่เหนือ Operation Report
+            const logoEstimatedHeight = 80;
+            window.logoStartY = operationReportY - logoEstimatedHeight - 10; // โลโก้อยู่เหนือ Operation Report 10px
             
             // รีเซ็ต textAlign กลับเป็นซ้ายสำหรับข้อมูลฝั่งซ้าย
             ctx.textAlign = 'left';
