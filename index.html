@@ -716,14 +716,14 @@
             let yPos = 40;
             let yPosRight = 40;
             
-            // เก็บตำแหน่งเริ่มต้นสำหรับโลโก้ (ระดับเดียวกับ Plant)
-            window.logoStartY = yPosRight; // Y = 40
+            // เก็บตำแหน่งเริ่มต้นสำหรับโลโก้ (ขยับขึ้น 5px)
+            window.logoStartY = yPosRight - 5; // Y = 35 (ขึ้นจาก 40)
             
             // คำนวณความสูงที่โลโก้ใช้
             const logoEstimatedHeight = 80;
             
             // Operation Report อยู่ใต้โลโก้
-            yPosRight = yPosRight + logoEstimatedHeight + 10; // เว้นระยะ 10px ระหว่างโลโก้กับ Operation Report
+            yPosRight = (yPosRight - 5) + logoEstimatedHeight + 10; // เว้นระยะ 10px ระหว่างโลโก้กับ Operation Report
             
             // วาด Operation Report
             ctx.font = 'bold 36px Inter';
