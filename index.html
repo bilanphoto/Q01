@@ -716,21 +716,21 @@
             let yPos = 40;
             let yPosRight = 40;
             
-            // เก็บตำแหน่งเริ่มต้นสำหรับโลโก้ (ขยับขึ้น 5px)
-            window.logoStartY = yPosRight - 5; // Y = 35 (ขึ้นจาก 40)
+            // เก็บตำแหน่งเริ่มต้นสำหรับโลโก้
+            window.logoStartY = yPosRight; // Y = 40
             
             // คำนวณความสูงที่โลโก้ใช้
             const logoEstimatedHeight = 80;
             
-            // Operation Report อยู่ใต้โลโก้
-            yPosRight = (yPosRight - 5) + logoEstimatedHeight + 10; // เว้นระยะ 10px ระหว่างโลโก้กับ Operation Report
+            // Operation Report อยู่ใต้โลโก้ โดยเว้นระยะ 15px (เหมือนรูปตัวอย่าง)
+            yPosRight = yPosRight + logoEstimatedHeight + 15;
             
             // วาด Operation Report
             ctx.font = 'bold 36px Inter';
             ctx.textAlign = 'right';
             ctx.fillText('Operation Report', canvas.width - 20, yPosRight);
             
-            yPosRight += 35; // ลดระยะห่างลงเหลือ 35px (เดิม 50px)
+            yPosRight += 35;
             
             // SAP No. อยู่ด้านล่าง Operation Report
             ctx.font = 'bold 22px Inter';
