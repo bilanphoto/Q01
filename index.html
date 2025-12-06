@@ -1115,21 +1115,46 @@
                     const seconds = String(now.getSeconds()).padStart(2, '0');
                     
                     // สร้างชื่อไฟล์: Plant_Area_DD-MM-YYYY_HH-MM-SS
-                    const fileName = `${plant}_${areaText}_${day}-${month}-${year}_${hours}-${minutes}-${seconds}.png`;
+                    const fileName = `${plant}_${areaText}_${day}-${month}-${year}_${hours}-${minutes}-${seconds}`;
                     
+                    // 1. Download ไฟล์ลงเครื่อง
                     const link = document.createElement('a');
-                    link.download = fileName;
+                    link.download = fileName + '.png';
                     link.href = exportCanvas.toDataURL('image/png', 1.0);
                     
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                     
-                    saveButtonContent.innerHTML = '<i class="fas fa-check"></i> บันทึกสำเร็จ!';
-                    setTimeout(() => {
-                        saveButtonContent.innerHTML = '<i class="fas fa-save"></i> Save';
-                        saveButton.disabled = false;
-                    }, 2000);
+                    // 2. Upload ไป Cloudinary
+                    exportCanvas.toBlob((blob) => {
+                        const formData = new FormData();
+                        formData.append('file', blob, fileName + '.png');
+                        formData.append('upload_preset', 'REport-oper');
+                        formData.append('folder', 'REport-oper');
+                        formData.append('public_id', fileName);
+                        
+                        fetch('https://api.cloudinary.com/v1_1/lik/image/upload', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Cloudinary upload success:', data);
+                            saveButtonContent.innerHTML = '<i class="fas fa-check"></i> บันทึกสำเร็จ! (เครื่อง + Cloud)';
+                        })
+                        .catch(error => {
+                            console.error('Cloudinary upload error:', error);
+                            saveButtonContent.innerHTML = '<i class="fas fa-check"></i> บันทึกสำเร็จ! (เฉพาะเครื่อง)';
+                        })
+                        .finally(() => {
+                            setTimeout(() => {
+                                saveButtonContent.innerHTML = '<i class="fas fa-save"></i> Save';
+                                saveButton.disabled = false;
+                            }, 2000);
+                        });
+                    }, 'image/png', 1.0);
+                    
                 } catch (error) {
                     console.error('Error saving image:', error);
                     saveButtonContent.innerHTML = '<i class="fas fa-exclamation-triangle"></i> เกิดข้อผิดพลาด';
