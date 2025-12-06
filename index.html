@@ -1117,43 +1117,57 @@
                     // สร้างชื่อไฟล์: Plant_Area_DD-MM-YYYY_HH-MM-SS
                     const fileName = `${plant}_${areaText}_${day}-${month}-${year}_${hours}-${minutes}-${seconds}`;
                     
+                    // แปลง canvas เป็น Data URL
+                    const dataURL = exportCanvas.toDataURL('image/png', 1.0);
+                    
                     // 1. Download ไฟล์ลงเครื่อง
                     const link = document.createElement('a');
                     link.download = fileName + '.png';
-                    link.href = exportCanvas.toDataURL('image/png', 1.0);
+                    link.href = dataURL;
                     
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                     
-                    // 2. Upload ไป Cloudinary
-                    exportCanvas.toBlob((blob) => {
-                        const formData = new FormData();
-                        formData.append('file', blob, fileName + '.png');
-                        formData.append('upload_preset', 'REport-oper');
-                        formData.append('folder', 'REport-oper');
-                        formData.append('public_id', fileName);
-                        
-                        fetch('https://api.cloudinary.com/v1_1/lik/image/upload', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log('Cloudinary upload success:', data);
-                            saveButtonContent.innerHTML = '<i class="fas fa-check"></i> บันทึกสำเร็จ! (เครื่อง + Cloud)';
-                        })
-                        .catch(error => {
-                            console.error('Cloudinary upload error:', error);
-                            saveButtonContent.innerHTML = '<i class="fas fa-check"></i> บันทึกสำเร็จ! (เฉพาะเครื่อง)';
-                        })
-                        .finally(() => {
-                            setTimeout(() => {
-                                saveButtonContent.innerHTML = '<i class="fas fa-save"></i> Save';
-                                saveButton.disabled = false;
-                            }, 2000);
-                        });
-                    }, 'image/png', 1.0);
+                    // 2. Upload ไป Cloudinary (ใช้ Data URL แทน Blob สำหรับความเข้ากันได้กับมือถือ)
+                    const formData = new FormData();
+                    formData.append('file', dataURL);
+                    formData.append('upload_preset', 'REport-oper');
+                    formData.append('folder', 'REport-oper');
+                    formData.append('public_id', fileName);
+                    
+                    console.log('Starting Cloudinary upload...', fileName);
+                    
+                    fetch('https://api.cloudinary.com/v1_1/lik/image/upload', {
+                        method: 'POST',
+                        body: formData,
+                        mode: 'cors'
+                    })
+                    .then(response => {
+                        console.log('Cloudinary response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Cloudinary upload success:', data);
+                        console.log('Image URL:', data.secure_url);
+                        saveButtonContent.innerHTML = '<i class="fas fa-check"></i> บันทึกสำเร็จ! (เครื่อง + Cloud)';
+                        setTimeout(() => {
+                            saveButtonContent.innerHTML = '<i class="fas fa-save"></i> Save';
+                            saveButton.disabled = false;
+                        }, 2000);
+                    })
+                    .catch(error => {
+                        console.error('Cloudinary upload error:', error);
+                        console.error('Error details:', error.message);
+                        saveButtonContent.innerHTML = '<i class="fas fa-check"></i> บันทึกสำเร็จ! (เฉพาะเครื่อง)';
+                        setTimeout(() => {
+                            saveButtonContent.innerHTML = '<i class="fas fa-save"></i> Save';
+                            saveButton.disabled = false;
+                        }, 2000);
+                    });
                     
                 } catch (error) {
                     console.error('Error saving image:', error);
