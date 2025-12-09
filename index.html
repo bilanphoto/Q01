@@ -581,8 +581,8 @@
         let backgroundImage = null; // เก็บภาพพื้นหลัง
         let logoImage = null; // เก็บรูปโลโก้
 
-        canvas.width = 1200;
-        canvas.height = 800;
+        canvas.width = 2400;
+        canvas.height = 1600;
         
         // โหลดภาพพื้นหลัง
         function loadBackgroundImage() {
@@ -653,9 +653,9 @@
             
             // วาดรูปโลโก้ (ถ้ามี) - อยู่ด้านบนสุด ชิดขวา
             if (logoImage) {
-                // คำนวณขนาดโลโก้ (ปรับขนาดเป็น 0.8 เท่าของเดิม)
-                const logoMaxWidth = 160; // ความกว้างสูงสุดของโลโก้ (200 * 0.8)
-                const logoMaxHeight = 80; // ความสูงสูงสุดของโลโก้ (100 * 0.8)
+                // คำนวณขนาดโลโก้ (ปรับขนาดเป็น 2 เท่า)
+                const logoMaxWidth = 320; // 160 * 2
+                const logoMaxHeight = 160; // 80 * 2
                 const logoRatio = logoImage.width / logoImage.height;
                 
                 let logoWidth, logoHeight;
@@ -668,8 +668,8 @@
                 }
                 
                 // วาดโลโก้ที่มุมขวาบน
-                const logoX = canvas.width - logoWidth - 20; // ห่างขอบขวา 20px
-                const logoY = window.logoStartY || 40; // อยู่ด้านบนสุด
+                const logoX = canvas.width - logoWidth - 40; // ห่างขอบขวา 40px (20 * 2)
+                const logoY = window.logoStartY || 80; // อยู่ด้านบนสุด
                 
                 // เพิ่มความโปร่งใสให้โลโก้เล็กน้อย (ถ้าต้องการ)
                 ctx.globalAlpha = 0.9;
@@ -680,9 +680,9 @@
             mainImages.forEach(img => {
                 ctx.save();
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-                ctx.shadowBlur = 15;
-                ctx.shadowOffsetX = 5;
-                ctx.shadowOffsetY = 5;
+                ctx.shadowBlur = 30; // 15 * 2
+                ctx.shadowOffsetX = 10; // 5 * 2
+                ctx.shadowOffsetY = 10; // 5 * 2
                 ctx.drawImage(img.image, img.x, img.y, img.width, img.height);
                 ctx.restore();
             });
@@ -713,108 +713,108 @@
 
             ctx.fillStyle = '#000000';
             
-            let yPos = 40;
-            let yPosRight = 40;
+            let yPos = 80; // 40 * 2
+            let yPosRight = 80; // 40 * 2
             
             // เก็บตำแหน่งเริ่มต้นสำหรับโลโก้
-            window.logoStartY = yPosRight; // Y = 40
+            window.logoStartY = yPosRight; // Y = 80
             
             // คำนวณความสูงที่โลโก้ใช้
-            const logoEstimatedHeight = 80;
+            const logoEstimatedHeight = 160; // 80 * 2
             
-            // Operation Report อยู่ใต้โลโก้ โดยเว้นระยะ 15px (เหมือนรูปตัวอย่าง)
-            yPosRight = yPosRight + logoEstimatedHeight + 15;
+            // Operation Report อยู่ใต้โลโก้ โดยเว้นระยะ 30px (15 * 2)
+            yPosRight = yPosRight + logoEstimatedHeight + 30;
             
             // วาด Operation Report
-            ctx.font = 'bold 36px Inter';
+            ctx.font = 'bold 72px Inter'; // 36 * 2
             ctx.textAlign = 'right';
-            ctx.fillText('Operation Report', canvas.width - 20, yPosRight);
+            ctx.fillText('Operation Report', canvas.width - 40, yPosRight); // margin 20 * 2
             
-            yPosRight += 35;
+            yPosRight += 70; // 35 * 2
             
             // SAP No. อยู่ด้านล่าง Operation Report
-            ctx.font = 'bold 22px Inter';
+            ctx.font = 'bold 44px Inter'; // 22 * 2
             ctx.fillStyle = '#000000';
             
             if (sapNo) {
                 // วัดความกว้างของตัวเลข SAP
-                ctx.font = '22px Inter';
+                ctx.font = '44px Inter'; // 22 * 2
                 ctx.fillStyle = '#ff0000';
                 const sapNumberWidth = ctx.measureText(sapNo).width;
                 
                 // วาดตัวเลข SAP (สีแดง) 
-                ctx.fillText(sapNo, canvas.width - 20, yPosRight);
+                ctx.fillText(sapNo, canvas.width - 40, yPosRight); // margin 20 * 2
                 
                 // วาด "SAP No. :" อยู่ซ้ายของตัวเลข
-                ctx.font = 'bold 22px Inter';
+                ctx.font = 'bold 44px Inter'; // 22 * 2
                 ctx.fillStyle = '#000000';
-                ctx.fillText('SAP No. :', canvas.width - 20 - sapNumberWidth - 10, yPosRight);
+                ctx.fillText('SAP No. :', canvas.width - 40 - sapNumberWidth - 20, yPosRight); // margin 20 * 2
             } else {
                 // ถ้าไม่มีตัวเลข SAP ให้แสดงแค่ label
-                ctx.fillText('SAP No. :', canvas.width - 20, yPosRight);
+                ctx.fillText('SAP No. :', canvas.width - 40, yPosRight); // margin 20 * 2
             }
             
             // รีเซ็ต textAlign กลับเป็นซ้ายสำหรับข้อมูลฝั่งซ้าย
             ctx.textAlign = 'left';
             
             // เริ่มวาดข้อมูลซ้าย
-            ctx.font = 'bold 22px Inter';
+            ctx.font = 'bold 44px Inter'; // 22 * 2
             
             // Plant และ Area (บรรทัดเดียวกัน)
-            ctx.fillText('Plant :', 20, yPos);
-            let xPos = 110;
+            ctx.fillText('Plant :', 40, yPos); // margin 20 * 2
+            let xPos = 220; // 110 * 2
             if (area) {
-                ctx.font = '22px Inter';
+                ctx.font = '44px Inter'; // 22 * 2
                 ctx.fillText(area, xPos, yPos);
-                xPos += ctx.measureText(area).width + 20; // เว้นระยะ 20px
-                ctx.font = 'bold 22px Inter';
+                xPos += ctx.measureText(area).width + 40; // 20 * 2
+                ctx.font = 'bold 44px Inter'; // 22 * 2
             }
             
             // แสดง Area ต่อท้าย Plant
             if (areaText) {
-                ctx.font = 'bold 22px Inter';
+                ctx.font = 'bold 44px Inter'; // 22 * 2
                 ctx.fillText('Area :', xPos, yPos);
-                xPos += ctx.measureText('Area :').width + 10;
-                ctx.font = '22px Inter';
+                xPos += ctx.measureText('Area :').width + 20; // 10 * 2
+                ctx.font = '44px Inter'; // 22 * 2
                 ctx.fillText(areaText, xPos, yPos);
-                ctx.font = 'bold 22px Inter';
+                ctx.font = 'bold 44px Inter'; // 22 * 2
             }
-            yPos += 35;
+            yPos += 70; // 35 * 2
             
             // Title job
-            ctx.fillText('Title job :', 20, yPos);
+            ctx.fillText('Title job :', 40, yPos); // margin 20 * 2
             if (titleJob) {
-                ctx.font = '22px Inter';
-                ctx.fillText(titleJob, 145, yPos);
-                ctx.font = 'bold 22px Inter';
+                ctx.font = '44px Inter'; // 22 * 2
+                ctx.fillText(titleJob, 290, yPos); // 145 * 2
+                ctx.font = 'bold 44px Inter'; // 22 * 2
             }
-            yPos += 35;
+            yPos += 70; // 35 * 2
             
             // Job description (คำนวณตำแหน่งให้มีช่องว่างเท่า Title job)
-            ctx.font = 'bold 22px Inter';
+            ctx.font = 'bold 44px Inter'; // 22 * 2
             const jobDescLabel = 'Job description :';
             const jobDescLabelWidth = ctx.measureText(jobDescLabel).width;
-            ctx.fillText(jobDescLabel, 20, yPos);
+            ctx.fillText(jobDescLabel, 40, yPos); // margin 20 * 2
             if (jobDescription) {
-                ctx.font = '22px Inter';
-                // เว้นระยะจากขอบซ้าย 20 + ความกว้าง label + ช่องว่าง 10px
-                ctx.fillText(jobDescription, 20 + jobDescLabelWidth + 10, yPos);
-                ctx.font = 'bold 22px Inter';
+                ctx.font = '44px Inter'; // 22 * 2
+                // เว้นระยะจากขอบซ้าย 40 + ความกว้าง label + ช่องว่าง 20px
+                ctx.fillText(jobDescription, 40 + jobDescLabelWidth + 20, yPos); // 20 * 2
+                ctx.font = 'bold 44px Inter'; // 22 * 2
             }
-            yPos += 35;
+            yPos += 70; // 35 * 2
             
             // Date
-            ctx.fillText('Date :', 20, yPos);
+            ctx.fillText('Date :', 40, yPos); // margin 20 * 2
             if (date) {
-                ctx.font = '22px Inter';
-                ctx.fillText(date, 100, yPos);
-                ctx.font = 'bold 22px Inter';
+                ctx.font = '44px Inter'; // 22 * 2
+                ctx.fillText(date, 200, yPos); // 100 * 2
+                ctx.font = 'bold 44px Inter'; // 22 * 2
             }
         }
 
         function drawShape(shape) {
             ctx.strokeStyle = '#ff0000';
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 12; // 6 * 2
             ctx.fillStyle = 'rgba(255, 0, 0, 0.1)';
 
             switch (shape.type) {
@@ -834,10 +834,10 @@
                     break;
                 case 'text':
                     // วัดขนาดข้อความ
-                    ctx.font = 'bold 24px Inter';
+                    ctx.font = 'bold 48px Inter'; // 24 * 2
                     const textMetrics = ctx.measureText(shape.text);
-                    const textHeight = 24;
-                    const padding = 5;
+                    const textHeight = 48; // 24 * 2
+                    const padding = 10; // 5 * 2
                     
                     // วาดพื้นหลังสีขาว
                     ctx.fillStyle = '#ffffff';
@@ -856,7 +856,7 @@
         }
 
         function drawArrow(fromX, fromY, toX, toY) {
-            const headLength = 15;
+            const headLength = 30; // 15 * 2
             const angle = Math.atan2(toY - fromY, toX - fromX);
 
             ctx.beginPath();
@@ -1020,9 +1020,9 @@
             mainImages = [];
             
             let loadedCount = 0;
-            const canvasMargin = 40;
-            const startY = 250;
-            const gap = 30;
+            const canvasMargin = 80; // 40 * 2
+            const startY = 500; // 250 * 2
+            const gap = 60; // 30 * 2
             const maxHeight = canvas.height - startY - canvasMargin;
             const maxWidth = canvas.width - (canvasMargin * 2);
             
