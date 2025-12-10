@@ -710,6 +710,48 @@
                     date = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
                 }
             }
+            
+            // ฟังก์ชันแบ่งข้อความเป็นหลายบรรทัด (รองรับ force break)
+            function wrapText(text, maxWidth) {
+                const words = text.split(' ');
+                const lines = [];
+                let currentLine = '';
+                
+                for (let word of words) {
+                    const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                    const metrics = ctx.measureText(testLine);
+                    
+                    if (metrics.width > maxWidth && currentLine) {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    } else {
+                        currentLine = testLine;
+                    }
+                    
+                    // Force break: ถ้าคำเดี่ยวยาวเกิน maxWidth ให้ตัดทีละตัวอักษร
+                    if (ctx.measureText(currentLine).width > maxWidth) {
+                        let chars = currentLine.split('');
+                        let tempLine = '';
+                        
+                        for (let char of chars) {
+                            const testChar = tempLine + char;
+                            if (ctx.measureText(testChar).width > maxWidth) {
+                                if (tempLine) lines.push(tempLine);
+                                tempLine = char;
+                            } else {
+                                tempLine = testChar;
+                            }
+                        }
+                        currentLine = tempLine;
+                    }
+                }
+                
+                if (currentLine) {
+                    lines.push(currentLine);
+                }
+                
+                return lines;
+            }
 
             ctx.fillStyle = '#000000';
             
@@ -790,24 +832,36 @@
             }
             yPos += 70; // 35 * 2
             
-            // Job description (คำนวณตำแหน่งให้มีช่องว่างเท่า Title job)
-            ctx.font = 'bold 44px Inter'; // 22 * 2
-            const jobDescLabel = 'Job description :';
-            const jobDescLabelWidth = ctx.measureText(jobDescLabel).width;
-            ctx.fillText(jobDescLabel, 40, yPos); // margin 20 * 2
-            if (jobDescription) {
-                ctx.font = '44px Inter'; // 22 * 2
-                // เว้นระยะจากขอบซ้าย 40 + ความกว้าง label + ช่องว่าง 20px
-                ctx.fillText(jobDescription, 40 + jobDescLabelWidth + 20, yPos); // 20 * 2
-                ctx.font = 'bold 44px Inter'; // 22 * 2
-            }
-            yPos += 70; // 35 * 2
-            
-            // Date
+            // Date (ย้ายมาก่อน Job description)
             ctx.fillText('Date :', 40, yPos); // margin 20 * 2
             if (date) {
                 ctx.font = '44px Inter'; // 22 * 2
                 ctx.fillText(date, 200, yPos); // 100 * 2
+                ctx.font = 'bold 44px Inter'; // 22 * 2
+            }
+            yPos += 70; // 35 * 2
+            
+            // Job description (รองรับหลายบรรทัด)
+            ctx.font = 'bold 44px Inter'; // 22 * 2
+            const jobDescLabel = 'Job description :';
+            const jobDescLabelWidth = ctx.measureText(jobDescLabel).width;
+            ctx.fillText(jobDescLabel, 40, yPos); // margin 20 * 2
+            
+            if (jobDescription) {
+                ctx.font = '44px Inter'; // 22 * 2
+                
+                // กำหนดความกว้างสูงสุดเป็น 1300px
+                const textStartX = 40 + jobDescLabelWidth + 20;
+                const maxTextWidth = 1300; // 1300px (รองรับ force break แล้ว)
+                
+                // แบ่งข้อความเป็นหลายบรรทัด
+                const lines = wrapText(jobDescription, maxTextWidth);
+                
+                // วาดแต่ละบรรทัด
+                lines.forEach((line, index) => {
+                    ctx.fillText(line, textStartX, yPos + (index * 70)); // 70 = ระยะห่างบรรทัด (35 * 2)
+                });
+                
                 ctx.font = 'bold 44px Inter'; // 22 * 2
             }
         }
