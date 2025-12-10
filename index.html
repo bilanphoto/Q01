@@ -588,6 +588,17 @@
         let mainImages = [];
         let backgroundImage = null; // เก็บภาพพื้นหลัง
         let logoImage = null; // เก็บรูปโลโก้
+        
+        // ตัวแปรสำหรับ drag & drop รูปภาพ
+        let isDraggingImage = false;
+        let draggedImageIndex = -1;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        
+        // ตัวแปรสำหรับ resize รูปภาพ
+        let hoveredImageIndex = -1;
+        let initialPinchDistance = 0;
+        let initialImageSize = { width: 0, height: 0 };
 
         canvas.width = 2400;
         canvas.height = 1600;
@@ -965,11 +976,27 @@
         function handleDrawStart(e) {
             e.preventDefault();
             
-            if (!currentMode) return;
-            
             const coords = getCanvasCoordinates(e);
             startX = coords.x;
             startY = coords.y;
+            
+            // ตรวจสอบว่าคลิกที่รูปภาพหรือไม่ (เช็คจากหลังไปหน้า เพื่อให้รูปบนสุดถูกเลือกก่อน)
+            for (let i = mainImages.length - 1; i >= 0; i--) {
+                const img = mainImages[i];
+                if (startX >= img.x && startX <= img.x + img.width &&
+                    startY >= img.y && startY <= img.y + img.height) {
+                    // คลิกที่รูปภาพ - เริ่ม drag
+                    isDraggingImage = true;
+                    draggedImageIndex = i;
+                    dragOffsetX = startX - img.x;
+                    dragOffsetY = startY - img.y;
+                    canvas.style.cursor = 'grabbing';
+                    return;
+                }
+            }
+            
+            // ถ้าไม่ได้คลิกที่รูป ให้ทำงานปกติ (วาดรูปร่าง)
+            if (!currentMode) return;
             
             if (currentMode === 'text') {
                 const text = document.getElementById('textDrawingInput').value;
@@ -990,16 +1017,40 @@
         function handleDrawMove(e) {
             e.preventDefault();
             
-            if (!isDrawing || !currentMode) return;
-            
             const coords = getCanvasCoordinates(e);
             const currentX = coords.x;
             const currentY = coords.y;
             
+            // ถ้ากำลังลากรูปภาพ
+            if (isDraggingImage && draggedImageIndex !== -1) {
+                const img = mainImages[draggedImageIndex];
+                img.x = currentX - dragOffsetX;
+                img.y = currentY - dragOffsetY;
+                redrawCanvas();
+                return;
+            }
+            
+            // เปลี่ยน cursor เมื่อ hover บนรูปภาพ
+            if (!isDrawing && !isDraggingImage) {
+                let onImage = false;
+                for (let i = mainImages.length - 1; i >= 0; i--) {
+                    const img = mainImages[i];
+                    if (currentX >= img.x && currentX <= img.x + img.width &&
+                        currentY >= img.y && currentY <= img.y + img.height) {
+                        onImage = true;
+                        break;
+                    }
+                }
+                canvas.style.cursor = onImage ? 'grab' : 'default';
+            }
+            
+            // วาดรูปร่างปกติ
+            if (!isDrawing || !currentMode) return;
+            
             redrawCanvas();
             
             ctx.strokeStyle = '#ff0000';
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 12; // 6 * 2
             
             switch (currentMode) {
                 case 'rect':
@@ -1019,6 +1070,14 @@
 
         function handleDrawEnd(e) {
             e.preventDefault();
+            
+            // ถ้ากำลังลากรูปภาพ
+            if (isDraggingImage) {
+                isDraggingImage = false;
+                draggedImageIndex = -1;
+                canvas.style.cursor = 'default';
+                return;
+            }
             
             if (!isDrawing || !currentMode) return;
             
@@ -1045,12 +1104,122 @@
             if (isDrawing) {
                 handleDrawEnd(e);
             }
+            if (isDraggingImage) {
+                isDraggingImage = false;
+                draggedImageIndex = -1;
+                canvas.style.cursor = 'default';
+            }
         });
 
         canvas.addEventListener('touchstart', handleDrawStart);
         canvas.addEventListener('touchmove', handleDrawMove);
         canvas.addEventListener('touchend', handleDrawEnd);
         canvas.addEventListener('touchcancel', handleDrawEnd);
+        
+        // Mouse wheel zoom
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            const coords = getCanvasCoordinates(e);
+            const mouseX = coords.x;
+            const mouseY = coords.y;
+            
+            // หารูปที่ mouse อยู่
+            for (let i = mainImages.length - 1; i >= 0; i--) {
+                const img = mainImages[i];
+                if (mouseX >= img.x && mouseX <= img.x + img.width &&
+                    mouseY >= img.y && mouseY <= img.y + img.height) {
+                    
+                    const delta = e.deltaY > 0 ? 0.9 : 1.1; // ซูมเข้า/ออก 10%
+                    const oldWidth = img.width;
+                    const oldHeight = img.height;
+                    
+                    img.width *= delta;
+                    img.height *= delta;
+                    
+                    // ปรับตำแหน่งให้ซูมที่จุดที่ mouse อยู่
+                    const mouseRelX = (mouseX - img.x) / oldWidth;
+                    const mouseRelY = (mouseY - img.y) / oldHeight;
+                    
+                    img.x = mouseX - (mouseRelX * img.width);
+                    img.y = mouseY - (mouseRelY * img.height);
+                    
+                    redrawCanvas();
+                    break;
+                }
+            }
+        }, { passive: false });
+        
+        // Touch pinch zoom
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const coords1 = getCanvasCoordinates(touch1);
+                const coords2 = getCanvasCoordinates(touch2);
+                
+                initialPinchDistance = Math.sqrt(
+                    Math.pow(coords2.x - coords1.x, 2) + 
+                    Math.pow(coords2.y - coords1.y, 2)
+                );
+                
+                const centerX = (coords1.x + coords2.x) / 2;
+                const centerY = (coords1.y + coords2.y) / 2;
+                
+                // หารูปที่กำลัง pinch
+                for (let i = mainImages.length - 1; i >= 0; i--) {
+                    const img = mainImages[i];
+                    if (centerX >= img.x && centerX <= img.x + img.width &&
+                        centerY >= img.y && centerY <= img.y + img.height) {
+                        hoveredImageIndex = i;
+                        initialImageSize = { width: img.width, height: img.height };
+                        break;
+                    }
+                }
+            }
+        }, { passive: false });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2 && hoveredImageIndex !== -1) {
+                e.preventDefault();
+                
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const coords1 = getCanvasCoordinates(touch1);
+                const coords2 = getCanvasCoordinates(touch2);
+                
+                const currentDistance = Math.sqrt(
+                    Math.pow(coords2.x - coords1.x, 2) + 
+                    Math.pow(coords2.y - coords1.y, 2)
+                );
+                
+                const scale = currentDistance / initialPinchDistance;
+                const img = mainImages[hoveredImageIndex];
+                
+                const centerX = (coords1.x + coords2.x) / 2;
+                const centerY = (coords1.y + coords2.y) / 2;
+                
+                const oldCenterX = img.x + img.width / 2;
+                const oldCenterY = img.y + img.height / 2;
+                
+                img.width = initialImageSize.width * scale;
+                img.height = initialImageSize.height * scale;
+                
+                img.x = oldCenterX - img.width / 2;
+                img.y = oldCenterY - img.height / 2;
+                
+                redrawCanvas();
+            }
+        }, { passive: false });
+        
+        canvas.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) {
+                hoveredImageIndex = -1;
+                initialPinchDistance = 0;
+            }
+        }, { passive: false });
 
         document.getElementById('btnUndo').addEventListener('click', () => {
             shapes.pop();
