@@ -980,7 +980,26 @@
             startX = coords.x;
             startY = coords.y;
             
-            // ตรวจสอบว่าคลิกที่รูปภาพหรือไม่ (เช็คจากหลังไปหน้า เพื่อให้รูปบนสุดถูกเลือกก่อน)
+            // ถ้ามี currentMode = ให้วาดแทนการลากรูป (มีความสำคัญสูงสุด)
+            if (currentMode) {
+                if (currentMode === 'text') {
+                    const text = document.getElementById('textDrawingInput').value;
+                    if (text) {
+                        shapes.push({
+                            type: 'text',
+                            x: startX,
+                            y: startY,
+                            text: text
+                        });
+                        redrawCanvas();
+                    }
+                } else {
+                    isDrawing = true;
+                }
+                return; // ออกจาก function ทันที ไม่ต้องเช็คว่าคลิกที่รูปหรือไม่
+            }
+            
+            // ถ้าไม่มี mode = ตรวจสอบว่าคลิกที่รูปภาพหรือไม่ (เช็คจากหลังไปหน้า)
             for (let i = mainImages.length - 1; i >= 0; i--) {
                 const img = mainImages[i];
                 if (startX >= img.x && startX <= img.x + img.width &&
@@ -993,24 +1012,6 @@
                     canvas.style.cursor = 'grabbing';
                     return;
                 }
-            }
-            
-            // ถ้าไม่ได้คลิกที่รูป ให้ทำงานปกติ (วาดรูปร่าง)
-            if (!currentMode) return;
-            
-            if (currentMode === 'text') {
-                const text = document.getElementById('textDrawingInput').value;
-                if (text) {
-                    shapes.push({
-                        type: 'text',
-                        x: startX,
-                        y: startY,
-                        text: text
-                    });
-                    redrawCanvas();
-                }
-            } else {
-                isDrawing = true;
             }
         }
 
@@ -1030,8 +1031,8 @@
                 return;
             }
             
-            // เปลี่ยน cursor เมื่อ hover บนรูปภาพ
-            if (!isDrawing && !isDraggingImage) {
+            // เปลี่ยน cursor เมื่อ hover บนรูปภาพ (เฉพาะเมื่อไม่ได้เลือก mode วาด)
+            if (!isDrawing && !isDraggingImage && !currentMode) {
                 let onImage = false;
                 for (let i = mainImages.length - 1; i >= 0; i--) {
                     const img = mainImages[i];
@@ -1116,8 +1117,11 @@
         canvas.addEventListener('touchend', handleDrawEnd);
         canvas.addEventListener('touchcancel', handleDrawEnd);
         
-        // Mouse wheel zoom
+        // Mouse wheel zoom (เฉพาะเมื่อไม่ได้เลือก mode วาด)
         canvas.addEventListener('wheel', (e) => {
+            // ถ้ากำลังเลือก mode วาด ให้ข้าม (ไม่ zoom)
+            if (currentMode) return;
+            
             e.preventDefault();
             
             const coords = getCanvasCoordinates(e);
@@ -1150,8 +1154,11 @@
             }
         }, { passive: false });
         
-        // Touch pinch zoom
+        // Touch pinch zoom (เฉพาะเมื่อไม่ได้เลือก mode วาด)
         canvas.addEventListener('touchstart', (e) => {
+            // ถ้ากำลังเลือก mode วาด ให้ข้าม (ไม่ zoom)
+            if (currentMode) return;
+            
             if (e.touches.length === 2) {
                 e.preventDefault();
                 
@@ -1182,6 +1189,9 @@
         }, { passive: false });
         
         canvas.addEventListener('touchmove', (e) => {
+            // ถ้ากำลังเลือก mode วาด ให้ข้าม (ไม่ zoom)
+            if (currentMode) return;
+            
             if (e.touches.length === 2 && hoveredImageIndex !== -1) {
                 e.preventDefault();
                 
