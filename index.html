@@ -964,9 +964,20 @@
         });
 
         function setMode(mode, button) {
+            // ถ้าคลิกปุ่มเดิมอีกครั้ง = ยกเลิก mode
+            if (currentMode === mode) {
+                currentMode = null;
+                button.classList.remove('active');
+                document.getElementById('textDrawingInput').classList.add('hidden');
+                canvas.style.cursor = 'default';
+                return;
+            }
+            
+            // เลือก mode ใหม่
             currentMode = mode;
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
+            canvas.style.cursor = 'crosshair';
             
             if (mode !== 'text') {
                 document.getElementById('textDrawingInput').classList.add('hidden');
