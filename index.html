@@ -515,6 +515,20 @@
                     <label for="dateInput">Date</label>
                     <input type="date" id="dateInput">
                 </div>
+                <div class="input-group">
+                    <label for="reportByInput">Report by</label>
+                    <input type="text" id="reportByInput" placeholder="กรอกชื่อผู้รายงาน">
+                </div>
+                <div class="input-group">
+                    <label for="shiftInput">Shift</label>
+                    <select id="shiftInput">
+                        <option value="">-- เลือก Shift --</option>
+                        <option value="Shift A">Shift A</option>
+                        <option value="Shift B">Shift B</option>
+                        <option value="Shift C">Shift C</option>
+                        <option value="Shift D">Shift D</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -882,6 +896,34 @@
                 });
                 
                 ctx.font = 'bold 44px Inter'; // 22 * 2
+            }
+            
+            // Report by และ Shift (มุมขวาล่าง)
+            const reportBy = document.getElementById('reportByInput').value;
+            const shift = document.getElementById('shiftInput').value;
+            
+            if (reportBy || shift) {
+                ctx.font = '44px Inter'; // 22 * 2
+                ctx.fillStyle = '#000000';
+                ctx.textAlign = 'right';
+                
+                const bottomY = canvas.height - 40; // ห่างขอบล่าง 40px (20 * 2)
+                const rightX = canvas.width - 40; // ห่างขอบขวา 40px (20 * 2)
+                
+                // สร้างข้อความ
+                let bottomText = '';
+                if (reportBy) {
+                    bottomText += 'Report by : ' + reportBy;
+                }
+                if (shift) {
+                    if (bottomText) bottomText += '  ';
+                    bottomText += shift;
+                }
+                
+                ctx.fillText(bottomText, rightX, bottomY);
+                
+                // รีเซ็ต textAlign กลับเป็นซ้าย
+                ctx.textAlign = 'left';
             }
         }
 
@@ -1471,6 +1513,8 @@
             redrawCanvas();
         });
         document.getElementById('dateInput').addEventListener('change', redrawCanvas);
+        document.getElementById('reportByInput').addEventListener('input', redrawCanvas);
+        document.getElementById('shiftInput').addEventListener('change', redrawCanvas);
         
         document.getElementById('dateInput').valueAsDate = new Date();
         
