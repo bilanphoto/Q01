@@ -1642,7 +1642,7 @@
             document.getElementById('cameraInput').click();
         });
         
-        // Camera Input - จัดการรูปที่ถ่าย
+        // Camera Input - จัดการรูปที่ถ่าย (ใช้ logic เดียวกับ fileInput)
         document.getElementById('cameraInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -1650,33 +1650,64 @@
                 reader.onload = function(event) {
                     const img = new Image();
                     img.onload = function() {
-                        // คำนวณขนาดรูปให้พอดี
-                        const maxWidth = 600;
-                        const maxHeight = 450;
-                        const aspectRatio = img.width / img.height;
+                        // ใช้ค่าเดียวกับ fileInput
+                        const canvasMargin = 80; // 40 * 2
+                        const startY = 500; // 250 * 2
+                        const gap = 60; // 30 * 2
+                        const maxHeight = canvas.height - startY - canvasMargin;
+                        const maxWidth = canvas.width - (canvasMargin * 2);
                         
-                        let displayWidth, displayHeight;
-                        if (aspectRatio > maxWidth / maxHeight) {
-                            displayWidth = maxWidth;
-                            displayHeight = maxWidth / aspectRatio;
-                        } else {
-                            displayHeight = maxHeight;
-                            displayWidth = maxHeight * aspectRatio;
+                        // เพิ่มรูปใหม่เข้าไปใน array ชั่วคราว
+                        const allImages = [...mainImages.map(m => m.image), img];
+                        
+                        // คำนวณขนาดทุกรูปใหม่
+                        let tallestHeight = 0;
+                        const imageData = allImages.map((image) => {
+                            const aspectRatio = image.width / image.height;
+                            let displayHeight = maxHeight;
+                            let displayWidth = displayHeight * aspectRatio;
+                            
+                            tallestHeight = Math.max(tallestHeight, displayHeight);
+                            
+                            return {
+                                image: image,
+                                aspectRatio: aspectRatio,
+                                width: displayWidth,
+                                height: displayHeight
+                            };
+                        });
+                        
+                        // คำนวณความกว้างรวม
+                        let totalWidth = imageData.reduce((sum, data) => sum + data.width, 0) + (gap * (allImages.length - 1));
+                        
+                        // ถ้ากว้างเกิน ให้ scale ลง
+                        if (totalWidth > maxWidth) {
+                            const scaleFactor = maxWidth / totalWidth;
+                            imageData.forEach(data => {
+                                data.width = data.width * scaleFactor;
+                                data.height = data.height * scaleFactor;
+                            });
+                            totalWidth = maxWidth;
                         }
                         
-                        // เพิ่มรูปลง canvas
-                        mainImages.push({
-                            image: img,
-                            x: 200,
-                            y: 200,
-                            width: displayWidth,
-                            height: displayHeight
+                        // วางรูปให้อยู่ตรงกลาง
+                        let currentX = (canvas.width - totalWidth) / 2;
+                        
+                        // อัปเดต mainImages ใหม่ทั้งหมด
+                        mainImages = [];
+                        imageData.forEach((data) => {
+                            mainImages.push({
+                                image: data.image,
+                                x: currentX,
+                                y: startY,
+                                width: data.width,
+                                height: data.height
+                            });
+                            
+                            currentX += data.width + gap;
                         });
                         
                         redrawCanvas();
-                        
-                        // แจ้งเตือนผู้ใช้
-                        alert('✅ เพิ่มรูปที่ถ่ายลง canvas แล้ว! สามารถลากย้ายและย่อขยายได้');
                     };
                     img.src = event.target.result;
                 };
