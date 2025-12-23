@@ -450,6 +450,40 @@
             transition: width 0.6s, height 0.6s;
         }
         
+        /* Camera Button Styles */
+        .btn-camera {
+            width: 100%;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: 2px solid #2563eb;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-camera:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border-color: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-camera:active {
+            transform: translateY(0);
+        }
+        
+        .btn-camera i {
+            font-size: 1.2rem;
+        }
+        
         .btn-save:hover::before {
             width: 400px;
             height: 400px;
@@ -603,6 +637,13 @@
             </h2>
             <div class="input-group">
                 <input type="file" id="fileInput" multiple accept="image/*">
+            </div>
+            <div class="input-group" style="margin-top: 12px;">
+                <button id="btnOpenCamera" class="btn-camera">
+                    <i class="fas fa-camera"></i>
+                    ถ่ายรูปด้วยกล้อง
+                </button>
+                <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display: none;">
             </div>
             <p id="statusMessage" class="hidden">โปรดเลือกรูปภาพหลักอย่างน้อย 1 รูป (สูงสุด 3 รูป)</p>
         </div>
@@ -1594,6 +1635,56 @@
                 };
                 reader.readAsDataURL(files[i]);
             }
+        });
+
+        // Camera Button - เปิดกล้องถ่ายรูป
+        document.getElementById('btnOpenCamera').addEventListener('click', function() {
+            document.getElementById('cameraInput').click();
+        });
+        
+        // Camera Input - จัดการรูปที่ถ่าย
+        document.getElementById('cameraInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // คำนวณขนาดรูปให้พอดี
+                        const maxWidth = 600;
+                        const maxHeight = 450;
+                        const aspectRatio = img.width / img.height;
+                        
+                        let displayWidth, displayHeight;
+                        if (aspectRatio > maxWidth / maxHeight) {
+                            displayWidth = maxWidth;
+                            displayHeight = maxWidth / aspectRatio;
+                        } else {
+                            displayHeight = maxHeight;
+                            displayWidth = maxHeight * aspectRatio;
+                        }
+                        
+                        // เพิ่มรูปลง canvas
+                        mainImages.push({
+                            image: img,
+                            x: 200,
+                            y: 200,
+                            width: displayWidth,
+                            height: displayHeight
+                        });
+                        
+                        redrawCanvas();
+                        
+                        // แจ้งเตือนผู้ใช้
+                        alert('✅ เพิ่มรูปที่ถ่ายลง canvas แล้ว! สามารถลากย้ายและย่อขยายได้');
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // Reset input เพื่อให้สามารถถ่ายรูปซ้ำได้
+            e.target.value = '';
         });
 
         document.getElementById('saveButton').addEventListener('click', () => {
