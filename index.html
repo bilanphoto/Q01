@@ -746,6 +746,9 @@
         let hoveredImageIndex = -1;
         let initialPinchDistance = 0;
         let initialImageSize = { width: 0, height: 0 };
+        
+        // ตัวแปรสำหรับปุ่มหมุน/ลบรูป
+        let selectedImageIndex = -1; // รูปที่เลือก (แสดงปุ่ม)
 
         canvas.width = 2400;
         canvas.height = 1600;
@@ -884,14 +887,31 @@
                 ctx.globalAlpha = 1.0; // รีเซ็ตความโปร่งใส
             }
             
-            mainImages.forEach(img => {
+            mainImages.forEach((img, index) => {
                 ctx.save();
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
                 ctx.shadowBlur = 30; // 15 * 2
                 ctx.shadowOffsetX = 10; // 5 * 2
                 ctx.shadowOffsetY = 10; // 5 * 2
-                ctx.drawImage(img.image, img.x, img.y, img.width, img.height);
+                
+                // หมุนรูปถ้ามีมุมหมุน
+                if (img.rotation) {
+                    const centerX = img.x + img.width / 2;
+                    const centerY = img.y + img.height / 2;
+                    ctx.translate(centerX, centerY);
+                    ctx.rotate(img.rotation * Math.PI / 180);
+                    ctx.drawImage(img.image, -img.width / 2, -img.height / 2, img.width, img.height);
+                    ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+                } else {
+                    ctx.drawImage(img.image, img.x, img.y, img.width, img.height);
+                }
+                
                 ctx.restore();
+                
+                // วาดกรอบและปุ่มถ้ารูปนี้ถูกเลือก
+                if (selectedImageIndex === index) {
+                    drawImageControls(img, index);
+                }
             });
             
             drawTemplateData();
@@ -899,6 +919,86 @@
             shapes.forEach(shape => {
                 drawShape(shape);
             });
+        }
+        
+        // ฟังก์ชันวาดปุ่มควบคุมรูปภาพ (หมุน, ลบ)
+        function drawImageControls(img, index) {
+            const buttonSize = 60; // ขนาดปุ่ม
+            const padding = 10;
+            
+            // วาดกรอบรอบรูป
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([10, 5]);
+            ctx.strokeRect(img.x - 5, img.y - 5, img.width + 10, img.height + 10);
+            ctx.setLineDash([]);
+            
+            // ปุ่มลบ (กากบาท) - มุมขวาบน
+            const deleteX = img.x + img.width - buttonSize / 2;
+            const deleteY = img.y - buttonSize / 2;
+            
+            // พื้นหลังปุ่มลบ
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(deleteX, deleteY, buttonSize / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // เงาปุ่ม
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 2;
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            
+            // วาดกากบาท
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            const crossSize = 16;
+            ctx.beginPath();
+            ctx.moveTo(deleteX - crossSize, deleteY - crossSize);
+            ctx.lineTo(deleteX + crossSize, deleteY + crossSize);
+            ctx.moveTo(deleteX + crossSize, deleteY - crossSize);
+            ctx.lineTo(deleteX - crossSize, deleteY + crossSize);
+            ctx.stroke();
+            
+            // ปุ่มหมุน (ลูกศรโค้ง) - มุมซ้ายบน
+            const rotateX = img.x - buttonSize / 2;
+            const rotateY = img.y - buttonSize / 2;
+            
+            // พื้นหลังปุ่มหมุน
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.arc(rotateX, rotateY, buttonSize / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // เงาปุ่ม
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 2;
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            
+            // วาดไอคอนหมุน (ลูกศรโค้ง)
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.arc(rotateX, rotateY, 12, 0.2 * Math.PI, 1.8 * Math.PI);
+            ctx.stroke();
+            
+            // ลูกศรหัว
+            ctx.beginPath();
+            ctx.moveTo(rotateX + 12, rotateY);
+            ctx.lineTo(rotateX + 18, rotateY - 6);
+            ctx.lineTo(rotateX + 18, rotateY + 6);
+            ctx.closePath();
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
         }
 
         function drawTemplateData() {
@@ -1235,8 +1335,45 @@
             startX = coords.x;
             startY = coords.y;
             
+            // ตรวจสอบว่าคลิกที่ปุ่มหมุน/ลบหรือไม่ (ถ้ามีรูปที่เลือก)
+            if (selectedImageIndex !== -1) {
+                const img = mainImages[selectedImageIndex];
+                const buttonSize = 60;
+                
+                // ปุ่มลบ (มุมขวาบน)
+                const deleteX = img.x + img.width - buttonSize / 2;
+                const deleteY = img.y - buttonSize / 2;
+                const deleteDistance = Math.sqrt(Math.pow(startX - deleteX, 2) + Math.pow(startY - deleteY, 2));
+                
+                if (deleteDistance <= buttonSize / 2) {
+                    // คลิกปุ่มลบ
+                    mainImages.splice(selectedImageIndex, 1);
+                    selectedImageIndex = -1;
+                    redrawCanvas();
+                    return;
+                }
+                
+                // ปุ่มหมุน (มุมซ้ายบน)
+                const rotateX = img.x - buttonSize / 2;
+                const rotateY = img.y - buttonSize / 2;
+                const rotateDistance = Math.sqrt(Math.pow(startX - rotateX, 2) + Math.pow(startY - rotateY, 2));
+                
+                if (rotateDistance <= buttonSize / 2) {
+                    // คลิกปุ่มหมุน - หมุน 90 องศา
+                    if (!img.rotation) {
+                        img.rotation = 0;
+                    }
+                    img.rotation = (img.rotation + 90) % 360;
+                    redrawCanvas();
+                    return;
+                }
+            }
+            
             // ถ้ามี currentMode = ให้วาดแทนการลากรูป (มีความสำคัญสูงสุด)
             if (currentMode) {
+                // ยกเลิกการเลือกรูป
+                selectedImageIndex = -1;
+                
                 if (currentMode === 'text') {
                     const text = document.getElementById('textDrawingInput').value;
                     if (text) {
@@ -1259,6 +1396,7 @@
             for (let i = shapes.length - 1; i >= 0; i--) {
                 if (isPointInShape(startX, startY, shapes[i])) {
                     // คลิกที่รูปร่าง - เริ่ม drag shape
+                    selectedImageIndex = -1; // ยกเลิกการเลือกรูป
                     isDraggingShape = true;
                     draggedShapeIndex = i;
                     shapeOffsetX = startX - shapes[i].x;
@@ -1273,14 +1411,28 @@
                 const img = mainImages[i];
                 if (startX >= img.x && startX <= img.x + img.width &&
                     startY >= img.y && startY <= img.y + img.height) {
-                    // คลิกที่รูปภาพ - เริ่ม drag
-                    isDraggingImage = true;
-                    draggedImageIndex = i;
-                    dragOffsetX = startX - img.x;
-                    dragOffsetY = startY - img.y;
-                    canvas.style.cursor = 'grabbing';
+                    // คลิกที่รูปภาพ
+                    
+                    // ถ้าคลิกรูปเดิมที่เลือกอยู่ = เริ่ม drag
+                    if (selectedImageIndex === i) {
+                        isDraggingImage = true;
+                        draggedImageIndex = i;
+                        dragOffsetX = startX - img.x;
+                        dragOffsetY = startY - img.y;
+                        canvas.style.cursor = 'grabbing';
+                    } else {
+                        // คลิกรูปใหม่ = เลือกรูป (แสดงปุ่ม)
+                        selectedImageIndex = i;
+                        redrawCanvas();
+                    }
                     return;
                 }
+            }
+            
+            // คลิกพื้นที่ว่าง = ยกเลิกการเลือกรูป
+            if (selectedImageIndex !== -1) {
+                selectedImageIndex = -1;
+                redrawCanvas();
             }
         }
 
