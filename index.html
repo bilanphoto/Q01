@@ -403,6 +403,11 @@
             font-size: 1rem;
             transition: all 0.3s ease;
             margin-bottom: 12px;
+            resize: vertical;
+            min-height: 50px;
+            overflow: hidden;
+            font-family: inherit;
+            line-height: 1.5;
         }
         
         #textDrawingInput:focus {
@@ -529,7 +534,7 @@
         <div class="header">
             <h1>
                 <span class="material-symbols-outlined icon">quick_reference</span>
-                Quickly Report
+                SOR Smart operation report
             </h1>
         </div>
 
@@ -646,7 +651,7 @@
                     </div>
                     <input type="color" id="customColorPicker" value="#ff0000" title="เลือกสีเอง" style="width: 50px; height: 40px; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer;">
                 </div>
-                <input type="text" id="textDrawingInput" placeholder="พิมพ์ข้อความที่ต้องการ... (กดคลิกบน canvas)" class="hidden">
+                <textarea id="textDrawingInput" placeholder="พิมพ์ข้อความที่ต้องการ... (กดคลิกบน canvas)" class="hidden" rows="1"></textarea>
                 <div class="mode-controls">
                     <button id="btnUndo" class="mode-btn btn-undo">
                         <i class="fas fa-undo"></i>
@@ -704,8 +709,13 @@
         function isPointInShape(x, y, shape) {
             switch (shape.type) {
                 case 'rect':
-                    return x >= shape.x && x <= shape.x + shape.width &&
-                           y >= shape.y && y <= shape.y + shape.height;
+                    // รองรับกรณี width/height เป็นค่าลบ (วาดจากขวาไปซ้าย หรือล่างไปบน)
+                    const minX = Math.min(shape.x, shape.x + shape.width);
+                    const maxX = Math.max(shape.x, shape.x + shape.width);
+                    const minY = Math.min(shape.y, shape.y + shape.height);
+                    const maxY = Math.max(shape.y, shape.y + shape.height);
+                    return x >= minX && x <= maxX &&
+                           y >= minY && y <= maxY;
                 case 'circle':
                     const centerX = shape.x + shape.width / 2;
                     const centerY = shape.y + shape.height / 2;
@@ -714,12 +724,12 @@
                     return distance <= radius;
                 case 'arrow':
                     // สำหรับลูกศร ใช้ bounding box
-                    const minX = Math.min(shape.x, shape.x + shape.width);
-                    const maxX = Math.max(shape.x, shape.x + shape.width);
-                    const minY = Math.min(shape.y, shape.y + shape.height);
-                    const maxY = Math.max(shape.y, shape.y + shape.height);
-                    return x >= minX - 20 && x <= maxX + 20 &&
-                           y >= minY - 20 && y <= maxY + 20;
+                    const arrowMinX = Math.min(shape.x, shape.x + shape.width);
+                    const arrowMaxX = Math.max(shape.x, shape.x + shape.width);
+                    const arrowMinY = Math.min(shape.y, shape.y + shape.height);
+                    const arrowMaxY = Math.max(shape.y, shape.y + shape.height);
+                    return x >= arrowMinX - 20 && x <= arrowMaxX + 20 &&
+                           y >= arrowMinY - 20 && y <= arrowMaxY + 20;
                 case 'text':
                     // สำหรับข้อความ วัดขนาดข้อความจริง
                     ctx.font = 'bold 48px Inter';
@@ -1708,6 +1718,16 @@
         }
         
         jobDescTextarea.addEventListener('input', autoResizeTextarea);
+        
+        // Auto-resize textarea สำหรับเครื่องมือวาดข้อความ
+        const textDrawingInput = document.getElementById('textDrawingInput');
+        
+        function autoResizeTextDrawing() {
+            textDrawingInput.style.height = 'auto';
+            textDrawingInput.style.height = Math.max(50, textDrawingInput.scrollHeight) + 'px';
+        }
+        
+        textDrawingInput.addEventListener('input', autoResizeTextDrawing);
         
         document.getElementById('sapNoInput').addEventListener('input', function(e) {
             this.value = this.value.replace(/[^0-9]/g, '');
