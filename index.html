@@ -484,6 +484,62 @@
             font-size: 1.2rem;
         }
         
+        /* Background Selection Styles */
+        .bg-option {
+            width: 200px;
+            height: 120px;
+            border: 4px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .bg-option:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+        
+        .bg-option.active {
+            border-color: #667eea;
+            border-width: 5px;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        .bg-option.active::after {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #667eea;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .bg-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
         .btn-save:hover::before {
             width: 400px;
             height: 400px;
@@ -625,6 +681,27 @@
                         <option value="Shift C">Shift C</option>
                         <option value="Shift D">Shift D</option>
                     </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">
+                <i class="fas fa-image"></i>
+                เลือกภาพพื้นหลัง
+            </h2>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 12px;">
+                <div class="bg-option active" data-bg="pttp.png" onclick="changeBackground('pttp.png', this)">
+                    <img src="pttp.png" alt="พื้นหลัง 1" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    <div class="bg-label">พื้นหลัง 1</div>
+                </div>
+                <div class="bg-option" data-bg="data:image/webp;base64,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" onclick="changeBackground('data:image/webp;base64,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', this)">
+                    <img src="data:image/webp;base64,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" alt="พื้นหลัง 2" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    <div class="bg-label">พื้นหลัง 2</div>
+                </div>
+                <div class="bg-option" data-bg="data:image/webp;base64,UklGRiwEAABXRUJQVlA4WAoAAAAgAAAAzwIAlAEASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggPgIAADBCAJ0BKtAClQE+USiSRyOioaEgCABwCglpbuF3YRtACewD32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+sAAA/v/v0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" onclick="changeBackground('data:image/webp;base64,UklGRiwEAABXRUJQVlA4WAoAAAAgAAAAzwIAlAEASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggPgIAADBCAJ0BKtAClQE+USiSRyOioaEgCABwCglpbuF3YRtACewD32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+sAAA/v/v0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', this)">
+                    <img src="data:image/webp;base64,UklGRiwEAABXRUJQVlA4WAoAAAAgAAAAzwIAlAEASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggPgIAADBCAJ0BKtAClQE+USiSRyOioaEgCABwCglpbuF3YRtACewD32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+2TkPfbJyHvtk5D32ych77ZOQ99snIe+sAAA/v/v0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" alt="พื้นหลัง 3" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    <div class="bg-label">พื้นหลัง 3</div>
                 </div>
             </div>
         </div>
@@ -795,16 +872,28 @@
         }
         
         // โหลดภาพพื้นหลัง
-        function loadBackgroundImage() {
+        function loadBackgroundImage(imageSrc = 'pttp.png') {
             const bgImg = new Image();
             bgImg.onload = function() {
                 backgroundImage = bgImg;
                 redrawCanvas();
             };
             bgImg.onerror = function() {
-                console.warn('ไม่สามารถโหลดภาพพื้นหลัง pttp.png ได้');
+                console.warn(`ไม่สามารถโหลดภาพพื้นหลัง ${imageSrc} ได้`);
             };
-            bgImg.src = 'pttp.png'; // ชื่อไฟล์ภาพพื้นหลัง
+            bgImg.src = imageSrc; // ชื่อไฟล์ภาพพื้นหลัง
+        }
+        
+        // ฟังก์ชันเปลี่ยนภาพพื้นหลัง
+        function changeBackground(imageSrc, element) {
+            // ลบ active จากทุก option
+            document.querySelectorAll('.bg-option').forEach(opt => opt.classList.remove('active'));
+            
+            // เพิ่ม active ให้ option ที่เลือก
+            element.classList.add('active');
+            
+            // โหลดภาพพื้นหลังใหม่
+            loadBackgroundImage(imageSrc);
         }
         
         // โหลดรูปโลโก้
@@ -1063,10 +1152,10 @@
             ctx.fillStyle = '#000000';
             
             let yPos = 80; // 40 * 2
-            let yPosRight = 45; // ขยับขึ้น 35px จากเดิม 80
+            let yPosRight = 52; // ขยับลง 7px จากเดิม 45 (เดิมสุด 80, ขยับขึ้น 35px แล้วขยับลง 7px = 52)
             
             // เก็บตำแหน่งเริ่มต้นสำหรับโลโก้
-            window.logoStartY = yPosRight; // Y = 45
+            window.logoStartY = yPosRight; // Y = 52
             
             // คำนวณความสูงที่โลโก้ใช้
             const logoEstimatedHeight = 160; // 80 * 2
