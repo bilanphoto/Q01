@@ -725,6 +725,20 @@
             <p id="statusMessage" class="hidden">โปรดเลือกรูปภาพหลักอย่างน้อย 1 รูป (สูงสุด 3 รูป)</p>
         </div>
 
+        <div class="section">
+            <h2 class="section-title">
+                <i class="fas fa-users"></i>
+                รูปทีมงาน
+                <span style="font-size: 0.85rem; font-weight: 500; color: #6b7280;">(รูปเล็กล่างซ้าย สูงสุด 5 รูป - ไม่บังคับ)</span>
+            </h2>
+            <div class="input-group">
+                <input type="file" id="overlayInput" multiple accept="image/*">
+            </div>
+            <p style="font-size: 0.85rem; color: #6b7280; margin-top: 8px;">
+                * ถ้าไม่ใส่รูปทีมงาน จะไม่แสดงอะไรบน canvas
+            </p>
+        </div>
+
         <div class="canvas-section">
             <h2 class="canvas-title">
                 <i class="fas fa-eye"></i>
@@ -804,6 +818,7 @@
         let currentColor = '#ff0000'; // สีเริ่มต้น = แดง
         let shapes = [];
         let mainImages = [];
+        let overlayImages = []; // รูป Overlay ล่างซ้าย (สูงสุด 5 รูป)
         let backgroundImage = null; // เก็บภาพพื้นหลัง
         let logoImage = null; // เก็บรูปโลโก้
         
@@ -1007,6 +1022,42 @@
             
             shapes.forEach(shape => {
                 drawShape(shape);
+            });
+            
+            // วาดรูป Overlay ล่างซ้าย (ถ้ามี)
+            drawOverlayImages();
+        }
+        
+        // ฟังก์ชันวาดรูป Overlay ล่างซ้าย
+        function drawOverlayImages() {
+            if (overlayImages.length === 0) return; // ถ้าไม่มีรูปก็ไม่วาดอะไร
+            
+            const overlaySize = 168; // 84 * 2 (ขนาดแต่ละรูป)
+            const gap = 20; // 10 * 2 (ระยะห่างระหว่างรูป)
+            const startX = 20; // 10 * 2 (ห่างจากขอบซ้าย)
+            const startY = canvas.height - overlaySize - 20; // 10 * 2 (ห่างจากขอบล่าง)
+            
+            overlayImages.forEach((imgData, index) => {
+                const x = startX + (overlaySize + gap) * index;
+                const y = startY;
+                
+                ctx.save();
+                
+                // วาดเงา
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                ctx.shadowBlur = 20;
+                ctx.shadowOffsetX = 5;
+                ctx.shadowOffsetY = 5;
+                
+                // วาดรูป
+                ctx.drawImage(imgData.image, x, y, overlaySize, overlaySize);
+                
+                // วาดกรอบขาว
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(x, y, overlaySize, overlaySize);
+                
+                ctx.restore();
             });
         }
         
@@ -1869,6 +1920,46 @@
                                 currentX += data.width + gap;
                             });
                             
+                            redrawCanvas();
+                        }
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(files[i]);
+            }
+        });
+
+        // Overlay Input - จัดการรูป Overlay (สูงสุด 5 รูป)
+        document.getElementById('overlayInput').addEventListener('change', function(e) {
+            const files = e.target.files;
+            
+            if (files.length === 0) {
+                return;
+            }
+            
+            if (files.length > 5) {
+                alert('⚠️ เลือกได้สูงสุด 5 รูปเท่านั้น');
+                e.target.value = '';
+                return;
+            }
+            
+            // ล้างรูป Overlay เดิม
+            overlayImages = [];
+            
+            let loadedCount = 0;
+            
+            for (let i = 0; i < files.length; i++) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        overlayImages.push({
+                            image: img
+                        });
+                        
+                        loadedCount++;
+                        
+                        if (loadedCount === files.length) {
                             redrawCanvas();
                         }
                     };
