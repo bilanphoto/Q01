@@ -710,7 +710,7 @@
             <h2 class="section-title">
                 <i class="fas fa-images"></i>
                 เลือกรูปภาพ
-                <span style="font-size: 0.85rem; font-weight: 500; color: #6b7280;">(เลือกได้สูงสุด 3 รูป)</span>
+                <span style="font-size: 0.85rem; font-weight: 500; color: #6b7280;">(เลือกได้สูงสุด 5 รูป)</span>
             </h2>
             <div class="input-group">
                 <input type="file" id="fileInput" multiple accept="image/*">
@@ -722,7 +722,7 @@
                 </button>
                 <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display: none;">
             </div>
-            <p id="statusMessage" class="hidden">โปรดเลือกรูปภาพหลักอย่างน้อย 1 รูป (สูงสุด 3 รูป)</p>
+            <p id="statusMessage" class="hidden">โปรดเลือกรูปภาพหลักอย่างน้อย 1 รูป (สูงสุด 5 รูป)</p>
         </div>
 
         <div class="section">
@@ -1846,13 +1846,13 @@
             const files = e.target.files;
             
             if (files.length === 0) {
-                document.getElementById('statusMessage').textContent = 'โปรดเลือกรูปภาพหลักอย่างน้อย 1 รูป (สูงสุด 3 รูป)';
+                document.getElementById('statusMessage').textContent = 'โปรดเลือกรูปภาพหลักอย่างน้อย 1 รูป (สูงสุด 5 รูป)';
                 document.getElementById('statusMessage').classList.remove('hidden');
                 return;
             }
             
-            if (files.length > 3) {
-                document.getElementById('statusMessage').textContent = 'เลือกได้สูงสุด 3 รูปเท่านั้น กรุณาเลือกใหม่';
+            if (files.length > 5) {
+                document.getElementById('statusMessage').textContent = 'เลือกได้สูงสุด 5 รูปเท่านั้น กรุณาเลือกใหม่';
                 document.getElementById('statusMessage').classList.remove('hidden');
                 e.target.value = '';
                 return;
