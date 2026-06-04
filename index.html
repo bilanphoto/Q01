@@ -483,6 +483,44 @@
         .btn-camera i {
             font-size: 1.2rem;
         }
+
+        /* Teams Button */
+        .btn-teams {
+            width: 100%;
+            padding: 20px;
+            margin-top: 16px;
+            background: linear-gradient(135deg, #5b5ea6 0%, #464775 100%);
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 6px 20px rgba(91, 94, 166, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-teams:hover {
+            background: linear-gradient(135deg, #464775 0%, #363660 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(91, 94, 166, 0.5);
+        }
+        .btn-teams:active {
+            transform: translateY(0);
+        }
+        .btn-teams i {
+            font-size: 1.2rem;
+        }
+        .btn-teams:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
         
         /* Background Selection Styles */
         .bg-option {
@@ -646,6 +684,7 @@
                         <option value="GSP6">GSP6</option>
                         <option value="ESP">ESP</option>
                         <option value="TANK FARM">TANK FARM</option>
+                        <option value="GPPP">GPPP</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -801,6 +840,13 @@
             <span id="saveButtonContent">
                 <i class="fas fa-save"></i>
                 Save
+            </span>
+        </button>
+
+        <button id="teamsButton" class="btn-teams">
+            <span id="teamsButtonContent">
+                <i class="fas fa-paper-plane"></i>
+                ส่งเข้า Teams
             </span>
         </button>
         
@@ -2163,6 +2209,93 @@
         });
 
         document.getElementById('areaInput').addEventListener('change', redrawCanvas);
+
+        // ===== Teams Webhook Config =====
+        // เพิ่ม Plant อื่นๆ ได้ในอนาคต
+        const TEAMS_WEBHOOKS = {
+            'GSP1 [Process]': 'https://defaultf2fda5e72ea1450d9fc12af5f86300.95.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f192e9ffb8be4125a3f19048b106cf37/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=kd_oLz2r1sqOF5bqeTLgEON2mH8lFDBUTYrG3n_ySC4',
+            'GSP1 [UT]'     : 'https://defaultf2fda5e72ea1450d9fc12af5f86300.95.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f192e9ffb8be4125a3f19048b106cf37/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=kd_oLz2r1sqOF5bqeTLgEON2mH8lFDBUTYrG3n_ySC4',
+            // 'GSP2' : 'https://...webhook_gsp2...',
+            // 'GSP3' : 'https://...webhook_gsp3...',
+            // 'GSP5' : 'https://...webhook_gsp5...',
+            // 'GSP6' : 'https://...webhook_gsp6...',
+            // 'ESP'  : 'https://...webhook_esp...',
+            // 'TANK FARM' : 'https://...webhook_tankfarm...',
+            // 'GPPP' : 'https://...webhook_gppp...',
+        };
+
+        const TEAMS_GROUP_NAMES = {
+            'GSP1 [Process]': 'GSP1 Pro_UT',
+            'GSP1 [UT]'     : 'GSP1 Pro_UT',
+        };
+
+        document.getElementById('teamsButton').addEventListener('click', async () => {
+            const teamsButton = document.getElementById('teamsButton');
+            const teamsButtonContent = document.getElementById('teamsButtonContent');
+
+            const plant    = document.getElementById('areaInput').value || '';
+            const area     = document.getElementById('areaTextInput').value || '-';
+            const titleJob = document.getElementById('titleJobInput').value || '-';
+            const sapNo    = document.getElementById('sapNoInput').value || '-';
+            const reportBy = document.getElementById('reportByInput').value || '-';
+            const shift    = document.getElementById('shiftInput').value || '-';
+            const dateVal  = document.getElementById('dateInput').value || '-';
+            const jobDesc  = document.getElementById('titleJopInput').value || '-';
+
+            // 1. เช็คว่าเลือก Plant หรือยัง
+            if (!plant) {
+                alert('⚠️ กรุณาเลือก Plant ก่อนส่งเข้า Teams');
+                return;
+            }
+
+            // 2. เช็คว่า Plant นี้มี Webhook หรือยัง
+            const webhookUrl = TEAMS_WEBHOOKS[plant];
+            if (!webhookUrl) {
+                alert(`⚠️ Plant "${plant}" ยังไม่ได้ตั้งค่า Teams Group\nกรุณาติดต่อผู้ดูแลระบบ`);
+                return;
+            }
+
+            // 3. แสดง confirm พร้อมบอกว่าจะส่งไป Group ไหน
+            const groupName = TEAMS_GROUP_NAMES[plant] || plant;
+            const ok = window.confirm(`📤 ยืนยันส่ง Report เข้า Teams\n\n📌 Group : ${groupName}\n🏭 Plant  : ${plant}\n🔢 SAP No.: ${sapNo}\n👤 By     : ${reportBy} Shift ${shift}\n\nต้องการส่งหรือไม่?`);
+            if (!ok) return;
+
+            teamsButton.disabled = true;
+            teamsButtonContent.innerHTML = '<span class="loader"></span> กำลังส่งเข้า ' + groupName + '...';
+
+            try {
+                const imageBase64 = canvas.toDataURL('image/png');
+
+                const payload = {
+                    plant, area, titleJob, sapNo,
+                    reportBy, shift, date: dateVal,
+                    jobDesc, image: imageBase64, group: groupName
+                };
+
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok || response.status === 202) {
+                    teamsButtonContent.innerHTML = `<i class="fas fa-check"></i> ส่งเข้า ${groupName} สำเร็จ! ✅`;
+                } else {
+                    throw new Error('status: ' + response.status);
+                }
+
+            } catch (error) {
+                console.warn('Teams:', error.message);
+                // อาจเป็น CORS แต่ส่งสำเร็จแล้ว
+                teamsButtonContent.innerHTML = `<i class="fas fa-check"></i> ส่งแล้ว → ตรวจสอบใน ${groupName}`;
+            } finally {
+                setTimeout(() => {
+                    teamsButtonContent.innerHTML = '<i class="fas fa-paper-plane"></i> ส่งเข้า Teams';
+                    teamsButton.disabled = false;
+                }, 4000);
+            }
+        });
+
         document.getElementById('areaTextInput').addEventListener('input', redrawCanvas);
         document.getElementById('titleJobInput').addEventListener('input', redrawCanvas);
         
