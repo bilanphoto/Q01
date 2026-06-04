@@ -2263,10 +2263,10 @@
             try {
                 // ส่งแค่ข้อความ ไม่ส่งรูป (Teams Adaptive Card มีขนาดจำกัด)
                 const payload = {
+                    targetWebhook: webhookUrl,  // ← GAS ต้องการตัวนี้เพื่อส่งต่อ
                     plant, area, titleJob, sapNo,
                     reportBy, shift, date: dateVal,
                     jobDesc, group: groupName
-                    // ไม่ส่ง image เพราะ Teams จำกัดขนาด
                 };
 
                 const response = await fetch(GAS_PROXY_URL, {
