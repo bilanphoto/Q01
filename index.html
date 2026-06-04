@@ -2274,9 +2274,9 @@
                 const blob = await new Promise(resolve => compressCanvas.toBlob(resolve, 'image/jpeg', 0.85));
                 const formData = new FormData();
                 formData.append('file', blob, 'report.jpg');
-                formData.append('upload_preset', 'ml_default');
+                formData.append('upload_preset', 'REport-oper');
 
-                const cloudinaryRes = await fetch('https://api.cloudinary.com/v1_1/dqxzjpctf/image/upload', {
+                const cloudinaryRes = await fetch('https://api.cloudinary.com/v1_1/lik/image/upload', {
                     method: 'POST',
                     body: formData
                 });
