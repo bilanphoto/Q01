@@ -2261,7 +2261,13 @@
             teamsButtonContent.innerHTML = `<span class="loader"></span> กำลังส่งเข้า ${groupName}...`;
 
             try {
-                const imageBase64 = canvas.toDataURL('image/png');
+                // บีบอัดรูปก่อนส่ง (ย่อจาก 2400x1600 → 1600x1067 และ quality 0.8)
+                const compressCanvas = document.createElement('canvas');
+                compressCanvas.width  = 1600;
+                compressCanvas.height = 1067;
+                const compressCtx = compressCanvas.getContext('2d');
+                compressCtx.drawImage(canvas, 0, 0, 1600, 1067);
+                const imageBase64 = compressCanvas.toDataURL('image/jpeg', 0.8);
 
                 // ส่งผ่าน Google Apps Script Proxy (แก้ CORS)
                 const payload = {
