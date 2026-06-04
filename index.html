@@ -2233,7 +2233,7 @@
             const plant    = document.getElementById('areaInput').value || '';
             const area     = document.getElementById('areaTextInput').value || '-';
             const titleJob = document.getElementById('titleJobInput').value || '-';
-            const sapNo    = document.getElementById('sapNoInput').value || '-';
+            const sapNo    = String(document.getElementById('sapNoInput').value || '-');
             const reportBy = document.getElementById('reportByInput').value || '-';
             const shift    = document.getElementById('shiftInput').value || '-';
             const dateVal  = document.getElementById('dateInput').value || '-';
@@ -2258,27 +2258,57 @@
             if (!ok) return;
 
             teamsButton.disabled = true;
-            teamsButtonContent.innerHTML = `<span class="loader"></span> กำลังส่งเข้า ${groupName}...`;
+            teamsButtonContent.innerHTML = `<span class="loader"></span> กำลังเตรียมรูป...`;
 
             try {
-                // ส่งแค่ข้อความ ไม่ส่งรูป (Teams Adaptive Card มีขนาดจำกัด)
+                // Step 1: บีบอัดรูป
+                const compressCanvas = document.createElement('canvas');
+                compressCanvas.width  = 1200;
+                compressCanvas.height = 800;
+                const compressCtx = compressCanvas.getContext('2d');
+                compressCtx.drawImage(canvas, 0, 0, 1200, 800);
+
+                // Step 2: Upload ขึ้น Cloudinary ก่อน
+                teamsButtonContent.innerHTML = `<span class="loader"></span> กำลัง Upload รูป...`;
+
+                const blob = await new Promise(resolve => compressCanvas.toBlob(resolve, 'image/jpeg', 0.85));
+                const formData = new FormData();
+                formData.append('file', blob, 'report.jpg');
+                formData.append('upload_preset', 'ml_default');
+
+                const cloudinaryRes = await fetch('https://api.cloudinary.com/v1_1/dqxzjpctf/image/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const cloudinaryData = await cloudinaryRes.json();
+
+                if (!cloudinaryData.secure_url) {
+                    throw new Error('Upload รูปไม่สำเร็จ');
+                }
+
+                const imageUrl = cloudinaryData.secure_url;
+
+                // Step 3: ส่ง URL รูป + ข้อมูลไป GAS → Teams
+                teamsButtonContent.innerHTML = `<span class="loader"></span> กำลังส่งเข้า ${groupName}...`;
+
                 const payload = {
-                    targetWebhook: webhookUrl,  // ← GAS ต้องการตัวนี้เพื่อส่งต่อ
+                    targetWebhook: webhookUrl,
                     plant, area, titleJob, sapNo,
                     reportBy, shift, date: dateVal,
-                    jobDesc, group: groupName
+                    jobDesc, group: groupName,
+                    imageUrl: imageUrl  // ← ส่ง URL แทน Base64
                 };
 
                 const response = await fetch(GAS_PROXY_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' }, // GAS ต้องการ text/plain
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(payload)
                 });
 
                 const result = await response.json();
 
                 if (result.status === 'ok') {
-                    teamsButtonContent.innerHTML = `<i class="fas fa-check"></i> ส่งเข้า ${groupName} สำเร็จ! ✅`;
+                    teamsButtonContent.innerHTML = `<i class="fas fa-check"></i> ส่งรูปเข้า ${groupName} สำเร็จ! ✅`;
                 } else {
                     throw new Error(result.message || 'unknown error');
                 }
