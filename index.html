@@ -2210,18 +2210,15 @@
 
         document.getElementById('areaInput').addEventListener('change', redrawCanvas);
 
-        // ===== Teams Webhook Config =====
-        // เพิ่ม Plant อื่นๆ ได้ในอนาคต
+        // ===== Teams Config =====
+        // Google Apps Script Proxy (แก้ปัญหา CORS)
+        const GAS_PROXY_URL = 'https://script.google.com/macros/s/AKfycbwpTe6e6n3D5PJPHkmF8vhuWmHqndNMhpGrA7Xy0LNoWUSHDEUJUi2sQMnBQiZCyIr-qg/exec';
+
         const TEAMS_WEBHOOKS = {
             'GSP1 [Process]': 'https://defaultf2fda5e72ea1450d9fc12af5f86300.95.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f192e9ffb8be4125a3f19048b106cf37/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=kd_oLz2r1sqOF5bqeTLgEON2mH8lFDBUTYrG3n_ySC4',
             'GSP1 [UT]'     : 'https://defaultf2fda5e72ea1450d9fc12af5f86300.95.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f192e9ffb8be4125a3f19048b106cf37/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=kd_oLz2r1sqOF5bqeTLgEON2mH8lFDBUTYrG3n_ySC4',
             // 'GSP2' : 'https://...webhook_gsp2...',
             // 'GSP3' : 'https://...webhook_gsp3...',
-            // 'GSP5' : 'https://...webhook_gsp5...',
-            // 'GSP6' : 'https://...webhook_gsp6...',
-            // 'ESP'  : 'https://...webhook_esp...',
-            // 'TANK FARM' : 'https://...webhook_tankfarm...',
-            // 'GPPP' : 'https://...webhook_gppp...',
         };
 
         const TEAMS_GROUP_NAMES = {
@@ -2242,52 +2239,55 @@
             const dateVal  = document.getElementById('dateInput').value || '-';
             const jobDesc  = document.getElementById('titleJopInput').value || '-';
 
-            // 1. เช็คว่าเลือก Plant หรือยัง
+            // 1. เช็ค Plant
             if (!plant) {
                 alert('⚠️ กรุณาเลือก Plant ก่อนส่งเข้า Teams');
                 return;
             }
 
-            // 2. เช็คว่า Plant นี้มี Webhook หรือยัง
+            // 2. เช็ค Webhook
             const webhookUrl = TEAMS_WEBHOOKS[plant];
             if (!webhookUrl) {
                 alert(`⚠️ Plant "${plant}" ยังไม่ได้ตั้งค่า Teams Group\nกรุณาติดต่อผู้ดูแลระบบ`);
                 return;
             }
 
-            // 3. แสดง confirm พร้อมบอกว่าจะส่งไป Group ไหน
+            // 3. Confirm
             const groupName = TEAMS_GROUP_NAMES[plant] || plant;
             const ok = window.confirm(`📤 ยืนยันส่ง Report เข้า Teams\n\n📌 Group : ${groupName}\n🏭 Plant  : ${plant}\n🔢 SAP No.: ${sapNo}\n👤 By     : ${reportBy} Shift ${shift}\n\nต้องการส่งหรือไม่?`);
             if (!ok) return;
 
             teamsButton.disabled = true;
-            teamsButtonContent.innerHTML = '<span class="loader"></span> กำลังส่งเข้า ' + groupName + '...';
+            teamsButtonContent.innerHTML = `<span class="loader"></span> กำลังส่งเข้า ${groupName}...`;
 
             try {
                 const imageBase64 = canvas.toDataURL('image/png');
 
+                // ส่งผ่าน Google Apps Script Proxy (แก้ CORS)
                 const payload = {
+                    targetWebhook: webhookUrl,  // GAS จะส่งต่อไปที่นี่
                     plant, area, titleJob, sapNo,
                     reportBy, shift, date: dateVal,
                     jobDesc, image: imageBase64, group: groupName
                 };
 
-                const response = await fetch(webhookUrl, {
+                const response = await fetch(GAS_PROXY_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain' }, // GAS ต้องการ text/plain
                     body: JSON.stringify(payload)
                 });
 
-                if (response.ok || response.status === 202) {
+                const result = await response.json();
+
+                if (result.status === 'ok') {
                     teamsButtonContent.innerHTML = `<i class="fas fa-check"></i> ส่งเข้า ${groupName} สำเร็จ! ✅`;
                 } else {
-                    throw new Error('status: ' + response.status);
+                    throw new Error(result.message || 'unknown error');
                 }
 
             } catch (error) {
-                console.warn('Teams:', error.message);
-                // อาจเป็น CORS แต่ส่งสำเร็จแล้ว
-                teamsButtonContent.innerHTML = `<i class="fas fa-check"></i> ส่งแล้ว → ตรวจสอบใน ${groupName}`;
+                console.error('Teams error:', error.message);
+                teamsButtonContent.innerHTML = `<i class="fas fa-times"></i> ส่งไม่สำเร็จ: ${error.message}`;
             } finally {
                 setTimeout(() => {
                     teamsButtonContent.innerHTML = '<i class="fas fa-paper-plane"></i> ส่งเข้า Teams';
