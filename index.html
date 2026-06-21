@@ -802,6 +802,13 @@
     </style>
 </head>
 <body>
+    <!-- Custom Canvas Context Menu -->
+    <div id="canvasContextMenu" class="hidden fixed z-[9999] bg-white border border-gray-200 rounded-xl shadow-xl py-1 w-48 text-sm text-gray-700 animate-in fade-in zoom-in-95 duration-100">
+        <button id="ctxPasteBtn" class="w-full text-left px-4 py-3 hover:bg-indigo-50 hover:text-indigo-600 flex items-center gap-2 font-medium transition focus:outline-none">
+            <i class="fas fa-paste"></i>
+            <span>วางรูปภาพ (Paste)</span>
+        </button>
+    </div>
     <div class="container">
         <div class="header">
             <h1>
@@ -1770,6 +1777,17 @@
         }
 
         function handleDrawStart(e) {
+            // Ignore right click (button 2)
+            if (e.button === 2) {
+                return;
+            }
+            
+            // Ignore if context menu is active
+            const ctxMenu = document.getElementById('canvasContextMenu');
+            if (ctxMenu && !ctxMenu.classList.contains('hidden')) {
+                return;
+            }
+            
             e.preventDefault();
             
             const coords = getCanvasCoordinates(e);
@@ -2143,6 +2161,68 @@
             redrawCanvas();
         });
 
+        // General helper to layout and set main images
+        function layoutAndSetMainImages(imageElements) {
+            if (imageElements.length === 0) {
+                mainImages = [];
+                redrawCanvas();
+                return;
+            }
+            
+            // Limit to 5 images max
+            const imgsToLayout = imageElements.slice(0, 5);
+            
+            const canvasMargin = 80; // 40 * 2
+            const startY = 500; // 250 * 2
+            const gap = 60; // 30 * 2
+            const maxHeight = canvas.height - startY - canvasMargin;
+            const maxWidth = canvas.width - (canvasMargin * 2);
+            
+            let tallestHeight = 0;
+            const imageData = imgsToLayout.map((img) => {
+                const aspectRatio = img.width / img.height;
+                let displayHeight = maxHeight;
+                let displayWidth = displayHeight * aspectRatio;
+                
+                tallestHeight = Math.max(tallestHeight, displayHeight);
+                
+                return {
+                    image: img,
+                    aspectRatio: aspectRatio,
+                    width: displayWidth,
+                    height: displayHeight
+                };
+            });
+            
+            let totalWidth = imageData.reduce((sum, data) => sum + data.width, 0) + (gap * (imgsToLayout.length - 1));
+            
+            if (totalWidth > maxWidth) {
+                const scaleFactor = maxWidth / totalWidth;
+                imageData.forEach(data => {
+                    data.width = data.width * scaleFactor;
+                    data.height = data.height * scaleFactor;
+                });
+                totalWidth = maxWidth;
+            }
+            
+            let currentX = (canvas.width - totalWidth) / 2;
+            
+            mainImages = [];
+            imageData.forEach((data) => {
+                mainImages.push({
+                    image: data.image,
+                    x: currentX,
+                    y: startY,
+                    width: data.width,
+                    height: data.height
+                });
+                
+                currentX += data.width + gap;
+            });
+            
+            redrawCanvas();
+        }
+
         document.getElementById('fileInput').addEventListener('change', (e) => {
             const files = e.target.files;
             
@@ -2160,15 +2240,8 @@
             }
             
             document.getElementById('statusMessage').classList.add('hidden');
-            mainImages = [];
             
             let loadedCount = 0;
-            const canvasMargin = 80; // 40 * 2
-            const startY = 500; // 250 * 2
-            const gap = 60; // 30 * 2
-            const maxHeight = canvas.height - startY - canvasMargin;
-            const maxWidth = canvas.width - (canvasMargin * 2);
-            
             const tempImages = [];
             
             for (let i = 0; i < files.length; i++) {
@@ -2180,48 +2253,7 @@
                         loadedCount++;
                         
                         if (loadedCount === files.length) {
-                            let tallestHeight = 0;
-                            const imageData = tempImages.map((img) => {
-                                const aspectRatio = img.width / img.height;
-                                let displayHeight = maxHeight;
-                                let displayWidth = displayHeight * aspectRatio;
-                                
-                                tallestHeight = Math.max(tallestHeight, displayHeight);
-                                
-                                return {
-                                    image: img,
-                                    aspectRatio: aspectRatio,
-                                    width: displayWidth,
-                                    height: displayHeight
-                                };
-                            });
-                            
-                            let totalWidth = imageData.reduce((sum, data) => sum + data.width, 0) + (gap * (files.length - 1));
-                            
-                            if (totalWidth > maxWidth) {
-                                const scaleFactor = maxWidth / totalWidth;
-                                imageData.forEach(data => {
-                                    data.width = data.width * scaleFactor;
-                                    data.height = data.height * scaleFactor;
-                                });
-                                totalWidth = maxWidth;
-                            }
-                            
-                            let currentX = (canvas.width - totalWidth) / 2;
-                            
-                            imageData.forEach((data) => {
-                                mainImages.push({
-                                    image: data.image,
-                                    x: currentX,
-                                    y: startY,
-                                    width: data.width,
-                                    height: data.height
-                                });
-                                
-                                currentX += data.width + gap;
-                            });
-                            
-                            redrawCanvas();
+                            layoutAndSetMainImages(tempImages);
                         }
                     };
                     img.src = event.target.result;
@@ -2283,64 +2315,13 @@
                 reader.onload = function(event) {
                     const img = new Image();
                     img.onload = function() {
-                        // ใช้ค่าเดียวกับ fileInput
-                        const canvasMargin = 80; // 40 * 2
-                        const startY = 500; // 250 * 2
-                        const gap = 60; // 30 * 2
-                        const maxHeight = canvas.height - startY - canvasMargin;
-                        const maxWidth = canvas.width - (canvasMargin * 2);
-                        
-                        // เพิ่มรูปใหม่เข้าไปใน array ชั่วคราว
-                        const allImages = [...mainImages.map(m => m.image), img];
-                        
-                        // คำนวณขนาดทุกรูปใหม่
-                        let tallestHeight = 0;
-                        const imageData = allImages.map((image) => {
-                            const aspectRatio = image.width / image.height;
-                            let displayHeight = maxHeight;
-                            let displayWidth = displayHeight * aspectRatio;
-                            
-                            tallestHeight = Math.max(tallestHeight, displayHeight);
-                            
-                            return {
-                                image: image,
-                                aspectRatio: aspectRatio,
-                                width: displayWidth,
-                                height: displayHeight
-                            };
-                        });
-                        
-                        // คำนวณความกว้างรวม
-                        let totalWidth = imageData.reduce((sum, data) => sum + data.width, 0) + (gap * (allImages.length - 1));
-                        
-                        // ถ้ากว้างเกิน ให้ scale ลง
-                        if (totalWidth > maxWidth) {
-                            const scaleFactor = maxWidth / totalWidth;
-                            imageData.forEach(data => {
-                                data.width = data.width * scaleFactor;
-                                data.height = data.height * scaleFactor;
-                            });
-                            totalWidth = maxWidth;
+                        const allImages = [...mainImages.map(m => m.image)];
+                        if (allImages.length >= 5) {
+                            showToast('เลือกรูปภาพหลักได้สูงสุด 5 รูปเท่านั้น', 'warning');
+                            return;
                         }
-                        
-                        // วางรูปให้อยู่ตรงกลาง
-                        let currentX = (canvas.width - totalWidth) / 2;
-                        
-                        // อัปเดต mainImages ใหม่ทั้งหมด
-                        mainImages = [];
-                        imageData.forEach((data) => {
-                            mainImages.push({
-                                image: data.image,
-                                x: currentX,
-                                y: startY,
-                                width: data.width,
-                                height: data.height
-                            });
-                            
-                            currentX += data.width + gap;
-                        });
-                        
-                        redrawCanvas();
+                        allImages.push(img);
+                        layoutAndSetMainImages(allImages);
                     };
                     img.src = event.target.result;
                 };
@@ -2349,6 +2330,195 @@
             
             // Reset input เพื่อให้สามารถถ่ายรูปซ้ำได้
             e.target.value = '';
+        });
+
+        // ==========================================
+        // CLIPBOARD PASTE & CUSTOM CONTEXT MENU FOR CANVAS
+        // ==========================================
+        
+        // Show custom context menu at coordinates
+        function showContextMenu(clientX, clientY) {
+            // Cancel active drawing/dragging states immediately to prevent blocking
+            isDrawing = false;
+            isDraggingShape = false;
+            isDraggingImage = false;
+            canvas.style.cursor = 'default';
+            
+            const ctxMenu = document.getElementById('canvasContextMenu');
+            if (!ctxMenu) return;
+            
+            ctxMenu.classList.remove('hidden');
+            
+            const menuWidth = ctxMenu.offsetWidth || 192;
+            const menuHeight = ctxMenu.offsetHeight || 46;
+            
+            let posX = clientX;
+            let posY = clientY;
+            
+            // Keep menu within viewport boundaries
+            if (clientX + menuWidth > window.innerWidth) {
+                posX = window.innerWidth - menuWidth - 10;
+            }
+            if (clientY + menuHeight > window.innerHeight) {
+                posY = window.innerHeight - menuHeight - 10;
+            }
+            
+            ctxMenu.style.left = `${posX}px`;
+            ctxMenu.style.top = `${posY}px`;
+        }
+
+        // Hide context menu on global click
+        document.addEventListener('click', function() {
+            const ctxMenu = document.getElementById('canvasContextMenu');
+            if (ctxMenu) ctxMenu.classList.add('hidden');
+        });
+
+        // Trigger context menu on right click
+        canvas.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            showContextMenu(e.clientX, e.clientY);
+        });
+
+        // Long Press Gesture for touch devices (Mobile/Tablet)
+        let touchTimer = null;
+        let longPressed = false;
+        let touchStartCoords = { x: 0, y: 0 };
+        
+        canvas.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 1) {
+                longPressed = false;
+                const touch = e.touches[0];
+                touchStartCoords = { x: touch.clientX, y: touch.clientY };
+                
+                touchTimer = setTimeout(function() {
+                    longPressed = true;
+                    showContextMenu(touch.clientX, touch.clientY);
+                }, 600); // 600ms long press threshold
+            }
+        });
+        
+        canvas.addEventListener('touchmove', function(e) {
+            if (touchTimer && e.touches.length === 1) {
+                const touch = e.touches[0];
+                const dx = touch.clientX - touchStartCoords.x;
+                const dy = touch.clientY - touchStartCoords.y;
+                // Cancel timer if finger moves more than 10px
+                if (Math.sqrt(dx*dx + dy*dy) > 10) {
+                    clearTimeout(touchTimer);
+                    touchTimer = null;
+                }
+            }
+        });
+        
+        canvas.addEventListener('touchend', function(e) {
+            if (touchTimer) {
+                clearTimeout(touchTimer);
+                touchTimer = null;
+            }
+            if (longPressed) {
+                e.preventDefault();
+            }
+        });
+
+        // Handle Paste Action from Clipboard
+        async function pasteImageFromClipboard() {
+            // Check if context is non-secure (e.g. local file:// protocol)
+            if (!window.isSecureContext) {
+                showToast('เนื่องจากทำงานแบบไฟล์ Local: กรุณาวางโดยกดปุ่ม Ctrl+V (Windows) หรือ Cmd+V (Mac) บนแป้นพิมพ์โดยตรงครับ 📋', 'warning', 6000);
+                return;
+            }
+            
+            try {
+                if (!navigator.clipboard || !navigator.clipboard.read) {
+                    showToast('เบราว์เซอร์ไม่สนับสนุนการอ่านคลิปบอร์ด โปรดกดปุ่ม Ctrl+V / Cmd+V บนแป้นพิมพ์เพื่อวางรูปภาพ 📋', 'warning', 6000);
+                    return;
+                }
+                
+                showToast('กำลังตรวจหาไฟล์รูปภาพจากคลิปบอร์ด...', 'info');
+                const clipboardItems = await navigator.clipboard.read();
+                
+                let foundImage = false;
+                for (const item of clipboardItems) {
+                    for (const type of item.types) {
+                        if (type.startsWith('image/')) {
+                            foundImage = true;
+                            const blob = await item.getType(type);
+                            
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                const img = new Image();
+                                img.onload = function() {
+                                    const currentImages = mainImages.map(m => m.image);
+                                    if (currentImages.length >= 5) {
+                                        showToast('เลือกรูปภาพหลักได้สูงสุด 5 รูปเท่านั้น', 'warning');
+                                        return;
+                                    }
+                                    
+                                    currentImages.push(img);
+                                    layoutAndSetMainImages(currentImages);
+                                    showToast('วางรูปภาพสำเร็จ! 📋', 'success');
+                                };
+                                img.src = event.target.result;
+                            };
+                            reader.readAsDataURL(blob);
+                            break;
+                        }
+                    }
+                    if (foundImage) break;
+                }
+                
+                if (!foundImage) {
+                    showToast('ไม่พบไฟล์รูปภาพในคลิปบอร์ด (กรุณากดคัดลอกรูปภาพจากที่อื่นก่อน)', 'warning');
+                }
+            } catch (err) {
+                console.error('Failed to paste image:', err);
+                showToast('ไม่สามารถเข้าถึงคลิปบอร์ดได้โดยตรง โปรดวางโดยกด Ctrl+V หรือ Cmd+V บนคีย์บอร์ด 📋', 'warning', 6000);
+            }
+        }
+
+        // Attach click listener to Context Menu Paste button
+        document.getElementById('ctxPasteBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const ctxMenu = document.getElementById('canvasContextMenu');
+            if (ctxMenu) ctxMenu.classList.add('hidden');
+            pasteImageFromClipboard();
+        });
+
+        // Keyboard Shortcut Paste (Ctrl+V / Cmd+V) globally
+        document.addEventListener('paste', function(e) {
+            // Only process paste if Report tab is currently active and user is not typing in a text field
+            const reportPage = document.getElementById('reportPage');
+            if (reportPage && !reportPage.classList.contains('hidden')) {
+                const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+                if (activeTag === 'input' || activeTag === 'textarea') {
+                    return; 
+                }
+                
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (const item of items) {
+                    if (item.type.indexOf('image') !== -1) {
+                        const blob = item.getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const img = new Image();
+                            img.onload = function() {
+                                const currentImages = mainImages.map(m => m.image);
+                                if (currentImages.length >= 5) {
+                                    showToast('เลือกรูปภาพหลักได้สูงสุด 5 รูปเท่านั้น', 'warning');
+                                    return;
+                                }
+                                currentImages.push(img);
+                                layoutAndSetMainImages(currentImages);
+                                showToast('วางรูปภาพสำเร็จ! 📋', 'success');
+                            };
+                            img.src = event.target.result;
+                        };
+                        reader.readAsDataURL(blob);
+                        e.preventDefault();
+                        break;
+                    }
+                }
+            }
         });
 
         document.getElementById('saveButton').addEventListener('click', () => {
@@ -2669,7 +2839,7 @@
         tabCloudinaryGallery.addEventListener('click', () => switchTab(tabCloudinaryGallery, galleryPage));
 
         // Floating Toast Notification
-        function showToast(message, type = 'success') {
+        function showToast(message, type = 'success', duration = 3000) {
             const container = document.getElementById('toastContainer');
             if (!container) return;
             const toast = document.createElement('div');
@@ -2698,7 +2868,7 @@
                         container.removeChild(toast);
                     }
                 }, 300);
-            }, 3000);
+            }, duration);
         }
 
         // Gallery Data State
@@ -2933,6 +3103,27 @@
             renderGalleryGrid();
         };
 
+        // Handle image loading failures (e.g. deleted files still returned by API cache)
+        window.handleImageLoadError = function(imgEl, publicId) {
+            try {
+                let localDeletedIds = JSON.parse(localStorage.getItem('deleted_public_ids') || '[]');
+                if (!localDeletedIds.includes(publicId)) {
+                    localDeletedIds.push(publicId);
+                    localStorage.setItem('deleted_public_ids', JSON.stringify(localDeletedIds));
+                }
+            } catch (e) {
+                console.error('Failed to save auto-deleted ID to localStorage:', e);
+            }
+            
+            // Remove the card from the DOM and state
+            const card = imgEl.closest('.gallery-card');
+            if (card) {
+                card.remove();
+                galleryImages = galleryImages.filter(img => img.publicId !== publicId);
+                renderFilters();
+            }
+        };
+
         // Render Image cards grid
         function renderGalleryGrid() {
             const gridEl = document.getElementById('galleryGrid');
@@ -2966,10 +3157,10 @@
             let html = '';
             filtered.forEach(img => {
                 html += `
-                    <div class="relative bg-white rounded-2xl overflow-hidden border border-gray-150 shadow-md group hover:shadow-xl transition-all duration-300 flex flex-col">
+                    <div class="gallery-card relative bg-white rounded-2xl overflow-hidden border border-gray-150 shadow-md group hover:shadow-xl transition-all duration-300 flex flex-col">
                         <div class="relative overflow-hidden aspect-video bg-gray-100">
                             <!-- Image itself (allows native copy) -->
-                            <img src="${img.url}" alt="${img.area}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer" onclick="openLightbox('${img.url}', '${img.plant} - ${img.area}')">
+                            <img src="${img.url}" alt="${img.area}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer" onclick="openLightbox('${img.url}', '${img.plant} - ${img.area}')" onerror="handleImageLoadError(this, '${img.publicId}')">
                             
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 pointer-events-none"></div>
                             
