@@ -239,103 +239,113 @@
         
         .drawing-controls {
             margin-top: 24px;
-            padding: 24px;
-            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-            border-radius: 16px;
-            border: 1px solid rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(229, 231, 235, 0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+        }
+        
+        .drawing-toolbar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+        
+        .drawing-controls-left {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+        
+        .drawing-controls-right {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: flex-start;
+        }
+        
+        @media (min-width: 1024px) {
+            .drawing-toolbar {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+            
+            .drawing-controls-left {
+                flex-direction: row;
+                align-items: center;
+                width: auto;
+            }
+            
+            .drawing-controls-right {
+                width: auto;
+                justify-content: flex-end;
+            }
         }
         
         .mode-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 16px;
-            justify-content: center;
+            display: inline-flex;
+            background: #f3f4f6;
+            padding: 4px;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            gap: 4px;
         }
         
         .mode-btn {
-            padding: 12px 24px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            background: white;
-            color: #374151;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            color: #4b5563;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             font-weight: 600;
-            font-size: 0.95rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
+            box-shadow: none;
             position: relative;
-            overflow: hidden;
-        }
-        
-        .mode-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(102, 126, 234, 0.1);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        .mode-btn:hover::before {
-            width: 300px;
-            height: 300px;
         }
         
         .mode-btn:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+            color: #1f2937;
+            background: rgba(0, 0, 0, 0.03);
         }
         
         .mode-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: #667eea;
-            color: white;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
-            transform: translateY(-2px);
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.12), 0 1px 2px rgba(79, 70, 229, 0.04);
         }
         
         .mode-btn i {
-            font-size: 1.1rem;
-            position: relative;
-            z-index: 1;
+            font-size: 1rem;
         }
         
-        .mode-btn span {
-            position: relative;
-            z-index: 1;
+        .color-picker-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
         
-        .btn-undo {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            border-color: #f59e0b;
-            color: white;
-        }
-        
-        .btn-undo:hover {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            border-color: #d97706;
-            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
-        }
-        
-        .btn-clear {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            border-color: #dc2626;
-            color: white;
-        }
-        
-        .btn-clear:hover {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            border-color: #b91c1c;
-            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+        .color-picker-label {
+            font-weight: 600;
+            color: #4b5563;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         
         /* Color Palette Styles */
@@ -344,55 +354,186 @@
             gap: 8px;
             flex-wrap: wrap;
             align-items: center;
+            background: #f9fafb;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            border: 1px solid #e5e7eb;
         }
         
         .color-swatch {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #e5e7eb;
-            border-radius: 8px;
+            width: 28px;
+            height: 28px;
+            border: 2px solid white;
+            border-radius: 50%;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             position: relative;
+            outline: 1px solid rgba(0, 0, 0, 0.05);
         }
         
         .color-swatch:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: scale(1.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            z-index: 2;
         }
         
         .color-swatch.active {
-            border-color: #667eea;
-            border-width: 4px;
-            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
-            transform: scale(1.05);
+            transform: scale(1.15);
+            outline: 2px solid #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
         }
         
         .color-swatch.active::after {
-            content: '✓';
+            content: '';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
         
-        #customColorPicker {
-            width: 50px;
-            height: 40px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
+        .color-swatch[data-color="#ffff00"].active::after {
+            background: #374151;
+        }
+        .color-swatch[data-color="#00ffff"].active::after {
+            background: #374151;
+        }
+        
+        /* Custom Color Picker Container */
+        .custom-color-picker-container {
+            position: relative;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            outline: 1px solid rgba(0, 0, 0, 0.1);
+            overflow: hidden;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: conic-gradient(from 0deg, red, yellow, lime, aqua, blue, magenta, red);
         }
         
-        #customColorPicker:hover {
-            border-color: #667eea;
-            transform: scale(1.05);
+        .custom-color-picker-container:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            outline: 2px solid #4f46e5;
+        }
+        
+        .custom-color-picker-container.active {
+            transform: scale(1.15);
+            outline: 2px solid #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+        
+        .custom-color-picker-container.active::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .custom-color-picker-container input[type="color"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .custom-color-picker-container i {
+            color: white;
+            font-size: 0.75rem;
+            pointer-events: none;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+        }
+        
+        /* Action buttons: Undo / Clear */
+        .btn-undo {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #d97706;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 4px rgba(217, 119, 6, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-undo:hover {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #b45309;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.12);
+        }
+        
+        .btn-undo:hover i {
+            transform: rotate(-45deg);
+        }
+        
+        .btn-undo i {
+            transition: transform 0.25s ease;
+            font-size: 0.95rem;
+        }
+        
+        .btn-clear {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 4px rgba(220, 38, 38, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-clear:hover {
+            background: #fee2e2;
+            border-color: #f87171;
+            color: #b91c1c;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.12);
+        }
+        
+        .btn-clear:hover i {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .btn-clear i {
+            font-size: 0.95rem;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
         }
         
         #textDrawingInput {
@@ -641,12 +782,15 @@
             }
             
             .mode-controls {
-                flex-direction: column;
+                display: flex;
+                width: 100%;
             }
             
             .mode-btn {
-                width: 100%;
+                flex: 1;
                 justify-content: center;
+                font-size: 0.85rem;
+                padding: 10px 4px;
             }
         }
         
@@ -666,7 +810,23 @@
             </h1>
         </div>
 
-        <div class="section">
+        <!-- Page Navigation Tabs -->
+        <div class="flex justify-center mb-6 border-b border-gray-200">
+            <nav class="flex space-x-4 md:space-x-8" aria-label="Tabs">
+                <button id="tabReportCreator" class="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-semibold text-sm flex items-center gap-2 transition-all duration-200 focus:outline-none">
+                    <i class="fas fa-edit"></i>
+                    สร้างรายงาน
+                </button>
+                <button id="tabCloudinaryGallery" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-semibold text-sm flex items-center gap-2 transition-all duration-200 focus:outline-none">
+                    <i class="fas fa-images"></i>
+                    คลังรูปภาพ
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content 1: Report Creator -->
+        <div id="reportPage" class="tab-content">
+            <div class="section">
             <h2 class="section-title">
                 <i class="fas fa-edit"></i>
                 กรอกข้อมูล
@@ -786,53 +946,64 @@
             <canvas id="imageCanvas"></canvas>
 
             <div class="drawing-controls">
-                <div class="mode-controls">
-                    <button id="modeRect" class="mode-btn">
-                        <i class="fas fa-vector-square"></i>
-                        <span>สี่เหลี่ยม</span>
-                    </button>
-                    <button id="modeCircle" class="mode-btn">
-                        <i class="far fa-circle"></i>
-                        <span>วงกลม</span>
-                    </button>
-                    <button id="modeArrow" class="mode-btn">
-                        <i class="fas fa-long-arrow-alt-right"></i>
-                        <span>ลูกศร</span>
-                    </button>
-                    <button id="modeText" class="mode-btn">
-                        <i class="fas fa-font"></i>
-                        <span>ข้อความ</span>
-                    </button>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
-                    <label style="font-weight: 600; color: #374151; font-size: 0.95rem;">
-                        <i class="fas fa-palette"></i> เลือกสี:
-                    </label>
-                    <div class="color-palette">
-                        <button class="color-swatch active" data-color="#ff0000" style="background: #ff0000;" title="แดง"></button>
-                        <button class="color-swatch" data-color="#006400" style="background: #006400;" title="เขียวเข้ม"></button>
-                        <button class="color-swatch" data-color="#0000ff" style="background: #0000ff;" title="น้ำเงิน"></button>
-                        <button class="color-swatch" data-color="#ffa500" style="background: #ffa500;" title="ส้ม"></button>
-                        <button class="color-swatch" data-color="#800080" style="background: #800080;" title="ม่วง"></button>
-                        <button class="color-swatch" data-color="#ff1493" style="background: #ff1493;" title="ชมพู"></button>
-                        <button class="color-swatch" data-color="#000000" style="background: #000000;" title="ดำ"></button>
-                        <button class="color-swatch" data-color="#ffff00" style="background: #ffff00;" title="เหลือง"></button>
-                        <button class="color-swatch" data-color="#00ffff" style="background: #00ffff;" title="ฟ้า"></button>
-                        <button class="color-swatch" data-color="#8b4513" style="background: #8b4513;" title="น้ำตาล"></button>
+                <div class="drawing-toolbar">
+                    <div class="drawing-controls-left">
+                        <div class="mode-controls">
+                            <button id="modeRect" class="mode-btn">
+                                <i class="fas fa-vector-square"></i>
+                                <span>สี่เหลี่ยม</span>
+                            </button>
+                            <button id="modeCircle" class="mode-btn">
+                                <i class="far fa-circle"></i>
+                                <span>วงกลม</span>
+                            </button>
+                            <button id="modeArrow" class="mode-btn">
+                                <i class="fas fa-long-arrow-alt-right"></i>
+                                <span>ลูกศร</span>
+                            </button>
+                            <button id="modeText" class="mode-btn">
+                                <i class="fas fa-font"></i>
+                                <span>ข้อความ</span>
+                            </button>
+                        </div>
+                        
+                        <div class="color-picker-section">
+                            <label class="color-picker-label">
+                                <i class="fas fa-palette"></i> เลือกสี:
+                            </label>
+                            <div class="color-palette">
+                                <button class="color-swatch active" data-color="#ff0000" style="background: #ff0000;" title="แดง"></button>
+                                <button class="color-swatch" data-color="#006400" style="background: #006400;" title="เขียวเข้ม"></button>
+                                <button class="color-swatch" data-color="#0000ff" style="background: #0000ff;" title="น้ำเงิน"></button>
+                                <button class="color-swatch" data-color="#ffa500" style="background: #ffa500;" title="ส้ม"></button>
+                                <button class="color-swatch" data-color="#800080" style="background: #800080;" title="ม่วง"></button>
+                                <button class="color-swatch" data-color="#ff1493" style="background: #ff1493;" title="ชมพู"></button>
+                                <button class="color-swatch" data-color="#000000" style="background: #000000;" title="ดำ"></button>
+                                <button class="color-swatch" data-color="#ffff00" style="background: #ffff00;" title="เหลือง"></button>
+                                <button class="color-swatch" data-color="#00ffff" style="background: #00ffff;" title="ฟ้า"></button>
+                                <button class="color-swatch" data-color="#8b4513" style="background: #8b4513;" title="น้ำตาล"></button>
+                                
+                                <div class="custom-color-picker-container" title="เลือกสีเอง">
+                                    <input type="color" id="customColorPicker" value="#ff0000">
+                                    <i class="fas fa-eye-dropper"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <input type="color" id="customColorPicker" value="#ff0000" title="เลือกสีเอง" style="width: 50px; height: 40px; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer;">
+                    
+                    <div class="drawing-controls-right">
+                        <button id="btnUndo" class="btn-undo">
+                            <i class="fas fa-undo"></i>
+                            <span>Undo</span>
+                        </button>
+                        <button id="btnClear" class="btn-clear">
+                            <i class="fas fa-trash-alt"></i>
+                            <span>ล้างรูปวาด</span>
+                        </button>
+                    </div>
                 </div>
+                
                 <textarea id="textDrawingInput" placeholder="พิมพ์ข้อความที่ต้องการ... (กดคลิกบน canvas)" class="hidden" rows="1"></textarea>
-                <div class="mode-controls">
-                    <button id="btnUndo" class="mode-btn btn-undo">
-                        <i class="fas fa-undo"></i>
-                        <span>Undo</span>
-                    </button>
-                    <button id="btnClear" class="mode-btn btn-clear">
-                        <i class="fas fa-trash-alt"></i>
-                        <span>ล้างรูปวาด</span>
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -849,6 +1020,76 @@
                 ส่งเข้า Teams
             </span>
         </button>
+        </div> <!-- End #reportPage -->
+
+        <!-- Tab Content 2: Cloudinary Gallery -->
+        <div id="galleryPage" class="tab-content hidden">
+            <!-- Filter folders -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-folder-open"></i>
+                    เลือกพื้นที่ (Plant Areas)
+                </h2>
+                <div id="areaFilters" class="flex flex-wrap gap-2 mb-4">
+                    <!-- Dynamic Area Tabs go here -->
+                </div>
+                
+                <!-- Search and Refresh Row -->
+                <div class="flex flex-col md:flex-row gap-4 justify-between items-center mt-6 pt-4 border-t border-gray-100">
+                    <div class="relative w-full md:w-72">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" id="gallerySearchInput" placeholder="ค้นหาพื้นที่ หรือ วันที่..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition bg-white">
+                    </div>
+                    
+                    <div class="flex gap-2 w-full md:w-auto justify-end">
+                        <button id="btnRefreshGallery" class="px-4 py-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                            <i class="fas fa-sync-alt"></i> รีเฟรช
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Grid Section -->
+            <div id="galleryStatus" class="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div>
+                <p class="mt-4 text-gray-500 text-sm font-medium">กำลังโหลดรูปภาพจาก Cloudinary...</p>
+            </div>
+            
+            <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 hidden">
+                <!-- Images will be dynamically inserted here -->
+            </div>
+            
+            <!-- Load More button -->
+            <div id="loadMoreContainer" class="flex justify-center mt-8 mb-4 hidden">
+                <button id="btnLoadMore" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-md transition duration-200 flex items-center gap-2">
+                    โหลดรูปภาพเพิ่มเติม <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+
+
+        
+        <!-- Lightbox Modal -->
+        <div id="lightboxModal" class="fixed inset-0 bg-black bg-opacity-95 z-50 hidden flex flex-col justify-center items-center p-4">
+            <button id="closeLightbox" class="absolute top-4 right-4 text-white hover:text-gray-300 text-3xl transition">
+                <i class="fas fa-times"></i>
+            </button>
+            <img id="lightboxImg" src="" alt="Full view" class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl">
+            <div id="lightboxCaption" class="text-white mt-4 text-lg font-semibold text-center"></div>
+            <div class="mt-4 flex gap-4">
+                <button id="lightboxCopyBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition flex items-center gap-2">
+                    <i class="fas fa-copy"></i> คัดลอกรูปภาพ
+                </button>
+                <a id="lightboxDownloadBtn" href="" download target="_blank" class="px-4 py-2 bg-gray-700 hover:bg-gray-850 text-white rounded-xl font-medium transition flex items-center gap-2">
+                    <i class="fas fa-download"></i> เปิดรูปเต็ม / ดาวน์โหลด
+                </a>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
         
         <div style="text-align: right; margin-top: 16px; padding: 8px; color: #9ca3af; font-size: 0.75rem; font-style: italic;">
             by490047
@@ -1477,6 +1718,13 @@
                 // ลบ active จากทุกปุ่ม
                 document.querySelectorAll('.color-swatch').forEach(btn => btn.classList.remove('active'));
                 
+                // ลบ active จาก custom color container
+                const customContainer = document.querySelector('.custom-color-picker-container');
+                if (customContainer) {
+                    customContainer.classList.remove('active');
+                    customContainer.style.background = ''; // Resets to conic gradient
+                }
+                
                 // เพิ่ม active ให้ปุ่มที่คลิก
                 this.classList.add('active');
                 
@@ -1491,6 +1739,13 @@
             
             // ลบ active จากปุ่มสีทั้งหมด
             document.querySelectorAll('.color-swatch').forEach(btn => btn.classList.remove('active'));
+            
+            // เพิ่ม active ให้ container และอัปเดตสีพื้นหลัง
+            const customContainer = document.querySelector('.custom-color-picker-container');
+            if (customContainer) {
+                customContainer.classList.add('active');
+                customContainer.style.background = e.target.value;
+            }
         });
 
         function setMode(mode, button) {
@@ -2156,15 +2411,17 @@
                         }
                         
                         // 2. Upload ไป Cloudinary
+                        const cloudName = localStorage.getItem('cld_cloud_name') || 'lik';
+                        const uploadPreset = localStorage.getItem('cld_upload_preset') || 'REport-oper';
                         const formData = new FormData();
                         formData.append('file', blob, fileName + '.png');
-                        formData.append('upload_preset', 'REport-oper');
-                        formData.append('folder', 'REport-oper');
+                        formData.append('upload_preset', uploadPreset);
+                        formData.append('folder', uploadPreset);
                         formData.append('public_id', fileName);
                         
                         console.log('Starting Cloudinary upload...', fileName);
                         
-                        fetch('https://api.cloudinary.com/v1_1/lik/image/upload', {
+                        fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
                             method: 'POST',
                             body: formData,
                             mode: 'cors'
@@ -2212,7 +2469,11 @@
 
         // ===== Teams Config =====
         // Google Apps Script Proxy (แก้ปัญหา CORS)
-        const GAS_PROXY_URL = 'https://script.google.com/macros/s/AKfycbwpTe6e6n3D5PJPHkmF8vhuWmHqndNMhpGrA7Xy0LNoWUSHDEUJUi2sQMnBQiZCyIr-qg/exec';
+        const oldGasUrl = 'https://script.google.com/macros/s/AKfycbwpTe6e6n3D5PJPHkmF8vhuWmHqndNMhpGrA7Xy0LNoWUSHDEUJUi2sQMnBQiZCyIr-qg/exec';
+        if (localStorage.getItem('gas_proxy_url') === oldGasUrl) {
+            localStorage.removeItem('gas_proxy_url');
+        }
+        let GAS_PROXY_URL = localStorage.getItem('gas_proxy_url') || 'https://script.google.com/macros/s/AKfycbxGSr9iizX1ZeKEHDKyCZe__6jVNlIuvgQglCTIon97wUc3xNzCtJTwGGXhFp97xHRynQ/exec';
 
         const TEAMS_WEBHOOKS = {
             'GSP1 [Process]': 'https://defaultf2fda5e72ea1450d9fc12af5f86300.95.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f192e9ffb8be4125a3f19048b106cf37/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=kd_oLz2r1sqOF5bqeTLgEON2mH8lFDBUTYrG3n_ySC4',
@@ -2271,12 +2532,27 @@
                 // Step 2: Upload ขึ้น Cloudinary ก่อน
                 teamsButtonContent.innerHTML = `<span class="loader"></span> กำลัง Upload รูป...`;
 
+                const now = new Date();
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = now.getFullYear();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const areaClean = area.replace(/\s+/g, '-').trim();
+                const fileName = `${plant}_${areaClean}_${day}-${month}-${year}_${hours}-${minutes}-${seconds}`;
+
+                const cloudName = localStorage.getItem('cld_cloud_name') || 'lik';
+                const uploadPreset = localStorage.getItem('cld_upload_preset') || 'REport-oper';
+
                 const blob = await new Promise(resolve => compressCanvas.toBlob(resolve, 'image/jpeg', 0.85));
                 const formData = new FormData();
-                formData.append('file', blob, 'report.jpg');
-                formData.append('upload_preset', 'REport-oper');
+                formData.append('file', blob, fileName + '.jpg');
+                formData.append('upload_preset', uploadPreset);
+                formData.append('folder', uploadPreset);
+                formData.append('public_id', fileName);
 
-                const cloudinaryRes = await fetch('https://api.cloudinary.com/v1_1/lik/image/upload', {
+                const cloudinaryRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
                     method: 'POST',
                     body: formData
                 });
@@ -2359,6 +2635,493 @@
         document.getElementById('dateInput').valueAsDate = new Date();
         
         redrawCanvas();
+
+        // =========================================================================
+        // CLOUDINARY GALLERY & SETTINGS MODULE
+        // =========================================================================
+
+        // Tab Elements & Navigation
+        const tabReportCreator = document.getElementById('tabReportCreator');
+        const tabCloudinaryGallery = document.getElementById('tabCloudinaryGallery');
+
+        const reportPage = document.getElementById('reportPage');
+        const galleryPage = document.getElementById('galleryPage');
+
+        function switchTab(activeTab, activePage) {
+            [tabReportCreator, tabCloudinaryGallery].forEach(tab => {
+                tab.classList.remove('border-indigo-500', 'text-indigo-600');
+                tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            });
+            [reportPage, galleryPage].forEach(page => {
+                page.classList.add('hidden');
+            });
+
+            activeTab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            activeTab.classList.add('border-indigo-500', 'text-indigo-600');
+            activePage.classList.remove('hidden');
+
+            if (activePage === galleryPage) {
+                loadGallery(false);
+            }
+        }
+
+        tabReportCreator.addEventListener('click', () => switchTab(tabReportCreator, reportPage));
+        tabCloudinaryGallery.addEventListener('click', () => switchTab(tabCloudinaryGallery, galleryPage));
+
+        // Floating Toast Notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-white font-medium transform translate-y-10 opacity-0 transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-indigo-600'
+            }`;
+            
+            const icon = document.createElement('i');
+            icon.className = type === 'success' ? 'fas fa-check-circle' : type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-info-circle';
+            
+            const text = document.createElement('span');
+            text.textContent = message;
+            
+            toast.appendChild(icon);
+            toast.appendChild(text);
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => {
+                    if (toast.parentNode === container) {
+                        container.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Gallery Data State
+        let galleryImages = [];
+        let currentFilterArea = 'All';
+        let galleryNextCursor = null;
+
+        // Helper function for JSONP requests to bypass GAS CORS redirect issues on local file:// origins
+        function fetchJsonp(url) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'cld_callback_' + Math.round(100000 * Math.random());
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve(data);
+                };
+                
+                const script = document.createElement('script');
+                const separator = url.includes('?') ? '&' : '?';
+                script.src = url + separator + 'callback=' + callbackName;
+                script.onerror = function() {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    reject(new Error('การเชื่อมต่อล้มเหลว (Network Error / CORS Redirect Block)'));
+                };
+                document.body.appendChild(script);
+            });
+        }
+
+        // Fetch assets from Cloudinary via GAS Proxy (JSONP version)
+        async function fetchCloudinaryImages(nextCursor = null) {
+            if (!GAS_PROXY_URL) {
+                return { error: 'config_required', message: 'กรุณาตั้งค่า GAS Proxy URL ที่แท็บ "ตั้งค่า" ก่อน' };
+            }
+
+            let url = `${GAS_PROXY_URL}?action=list&_t=${Date.now()}`;
+            if (nextCursor) {
+                url += `&next_cursor=${encodeURIComponent(nextCursor)}`;
+            }
+
+            try {
+                const result = await fetchJsonp(url);
+                if (result.status === 'ok') {
+                    return result.data;
+                } else {
+                    throw new Error(result.message || 'Error fetching images');
+                }
+            } catch (err) {
+                console.error('Fetch gallery error:', err);
+                return { error: 'api_error', message: err.message };
+            }
+        }
+
+        // Parse public_id into plant, area, date, time
+        function parseCloudinaryResource(resource) {
+            let filename = resource.public_id;
+            if (filename.includes('/')) {
+                filename = filename.substring(filename.indexOf('/') + 1);
+            }
+            
+            const parts = filename.split('_');
+            let plant = '';
+            let areaText = '';
+            let dateStr = '';
+            let timeStr = '';
+            
+            const possiblePlants = [
+                "GSP1 [Process]", "GSP1 [UT]", "GSP2", "GSP3", "GSP5", "GSP6", "ESP", "TANK FARM", "GPPP"
+            ];
+            
+            for (const p of possiblePlants) {
+                if (filename.startsWith(p + '_')) {
+                    plant = p;
+                    break;
+                }
+            }
+            
+            if (plant) {
+                const remaining = filename.substring(plant.length + 1);
+                const subParts = remaining.split('_');
+                if (subParts.length >= 2) {
+                    timeStr = subParts.pop().replace(/-/g, ':');
+                    dateStr = subParts.pop();
+                    areaText = subParts.join('_');
+                } else {
+                    areaText = remaining;
+                }
+            } else {
+                if (parts.length >= 4) {
+                    plant = parts[0];
+                    areaText = parts[1];
+                    dateStr = parts[2];
+                    timeStr = parts[3].replace(/-/g, ':');
+                } else {
+                    plant = 'Others';
+                    areaText = filename;
+                }
+            }
+            
+            return {
+                publicId: resource.public_id,
+                url: resource.secure_url,
+                plant: plant || 'Others',
+                area: areaText || '-',
+                date: dateStr || 'ไม่ระบุวันที่',
+                time: timeStr || '',
+                createdAt: resource.created_at
+            };
+        }
+
+        // Gallery Manager Load Loop
+        async function loadGallery(loadMore = false) {
+            const statusEl = document.getElementById('galleryStatus');
+            const gridEl = document.getElementById('galleryGrid');
+            const btnLoadMore = document.getElementById('btnLoadMore');
+            const loadMoreContainer = document.getElementById('loadMoreContainer');
+            
+            if (!loadMore) {
+                statusEl.innerHTML = `
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p class="mt-4 text-gray-500 text-sm font-medium">กำลังโหลดรูปภาพจาก Cloudinary...</p>
+                `;
+                statusEl.classList.remove('hidden');
+                gridEl.classList.add('hidden');
+                loadMoreContainer.classList.add('hidden');
+                galleryImages = [];
+                galleryNextCursor = null;
+            } else {
+                btnLoadMore.disabled = true;
+                btnLoadMore.innerHTML = `กำลังโหลด... <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block ml-1"></span>`;
+            }
+            
+            const result = await fetchCloudinaryImages(galleryNextCursor);
+            
+            if (result.error) {
+                let errorMsg = result.message;
+                if (result.error === 'config_required') {
+                    statusEl.innerHTML = `
+                        <div class="text-indigo-500 text-4xl mb-3"><i class="fas fa-key"></i></div>
+                        <p class="text-gray-700 font-semibold mb-2">${errorMsg}</p>
+                    `;
+                } else {
+                    statusEl.innerHTML = `
+                        <div class="text-red-500 text-4xl mb-3"><i class="fas fa-exclamation-triangle"></i></div>
+                        <p class="text-gray-700 font-semibold mb-2">ไม่สามารถเชื่อมต่อ Cloudinary ได้</p>
+                        <p class="text-gray-500 text-xs">${errorMsg}</p>
+                        <button onclick="loadGallery(false)" class="px-4 py-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-xs font-semibold transition mt-4">
+                            <i class="fas fa-sync-alt mr-1"></i> ลองอีกครั้ง
+                        </button>
+                    `;
+                }
+                btnLoadMore.disabled = false;
+                btnLoadMore.innerHTML = `โหลดรูปภาพเพิ่มเติม <i class="fas fa-chevron-down"></i>`;
+                return;
+            }
+            
+            const newResources = result.resources || [];
+            const parsedImages = newResources.map(parseCloudinaryResource);
+            
+            // Filter out any locally deleted public IDs to prevent reappearing on eventual consistency propagation lag
+            let localDeletedIds = [];
+            try {
+                localDeletedIds = JSON.parse(localStorage.getItem('deleted_public_ids') || '[]');
+            } catch (e) {
+                console.error('Failed to read deleted public IDs from localStorage:', e);
+            }
+            
+            const filteredParsed = parsedImages.filter(img => !localDeletedIds.includes(img.publicId));
+            
+            galleryImages = galleryImages.concat(filteredParsed);
+            // Sort gallery images by upload date/time (newest first)
+            galleryImages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            galleryNextCursor = result.next_cursor || null;
+            
+            statusEl.classList.add('hidden');
+            gridEl.classList.remove('hidden');
+            
+            renderFilters();
+            renderGalleryGrid();
+            
+            if (galleryNextCursor) {
+                loadMoreContainer.classList.remove('hidden');
+                btnLoadMore.disabled = false;
+                btnLoadMore.innerHTML = `โหลดรูปภาพเพิ่มเติม <i class="fas fa-chevron-down"></i>`;
+            } else {
+                loadMoreContainer.classList.add('hidden');
+            }
+        }
+
+        // Render Navigation pill tabs (Folders)
+        function renderFilters() {
+            const filtersEl = document.getElementById('areaFilters');
+            if (!filtersEl) return;
+            
+            const counts = { 'All': galleryImages.length };
+            galleryImages.forEach(img => {
+                counts[img.plant] = (counts[img.plant] || 0) + 1;
+            });
+            
+            const possiblePlants = [
+                "All", "GSP1 [Process]", "GSP1 [UT]", "GSP2", "GSP3", "GSP5", "GSP6", "ESP", "TANK FARM", "GPPP", "Others"
+            ];
+            
+            let html = '';
+            possiblePlants.forEach(plant => {
+                const count = counts[plant] || 0;
+                if (plant === 'Others' && count === 0) return;
+                
+                const displayName = plant === 'All' ? 'ทั้งหมด' : plant;
+                const isActive = currentFilterArea === plant;
+                
+                html += `
+                    <button onclick="setFilterArea('${plant}')" class="px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 ${
+                        isActive 
+                        ? 'bg-indigo-600 text-white shadow-md' 
+                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                    }">
+                        <i class="${plant === 'All' ? 'fas fa-globe' : 'fas fa-folder'}"></i>
+                        <span>${displayName}</span>
+                        <span class="text-xs ${isActive ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-500'} px-2 py-0.5 rounded-full font-bold">${count}</span>
+                    </button>
+                `;
+            });
+            
+            filtersEl.innerHTML = html;
+        }
+
+        window.setFilterArea = function(area) {
+            currentFilterArea = area;
+            renderFilters();
+            renderGalleryGrid();
+        };
+
+        // Render Image cards grid
+        function renderGalleryGrid() {
+            const gridEl = document.getElementById('galleryGrid');
+            if (!gridEl) return;
+            const searchVal = document.getElementById('gallerySearchInput').value.toLowerCase().trim();
+            
+            let filtered = galleryImages;
+            
+            if (currentFilterArea !== 'All') {
+                filtered = filtered.filter(img => img.plant === currentFilterArea);
+            }
+            
+            if (searchVal) {
+                filtered = filtered.filter(img => 
+                    img.area.toLowerCase().includes(searchVal) || 
+                    img.date.toLowerCase().includes(searchVal) ||
+                    img.plant.toLowerCase().includes(searchVal)
+                );
+            }
+            
+            if (filtered.length === 0) {
+                gridEl.innerHTML = `
+                    <div class="col-span-full text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-sm w-full">
+                        <div class="text-gray-300 text-5xl mb-4"><i class="far fa-image"></i></div>
+                        <p class="text-gray-500 font-medium">ไม่พบรูปภาพในพื้นที่นี้</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            filtered.forEach(img => {
+                html += `
+                    <div class="relative bg-white rounded-2xl overflow-hidden border border-gray-150 shadow-md group hover:shadow-xl transition-all duration-300 flex flex-col">
+                        <div class="relative overflow-hidden aspect-video bg-gray-100">
+                            <!-- Image itself (allows native copy) -->
+                            <img src="${img.url}" alt="${img.area}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer" onclick="openLightbox('${img.url}', '${img.plant} - ${img.area}')">
+                            
+                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 pointer-events-none"></div>
+                            
+                            <!-- Copy Button -->
+                            <button onclick="copyImage('${img.url}')" class="absolute top-2 right-12 bg-white bg-opacity-95 hover:bg-opacity-100 hover:bg-indigo-50 text-gray-700 hover:text-indigo-600 p-2 rounded-xl shadow-md transition pointer-events-auto" title="คัดลอกรูปภาพ">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            
+                            <!-- Delete Button (Trash Icon) -->
+                            <button onclick="deleteImage('${img.publicId}')" class="absolute top-2 right-2 bg-white bg-opacity-95 hover:bg-opacity-100 hover:bg-red-50 text-gray-700 hover:text-red-600 p-2 rounded-xl shadow-md transition pointer-events-auto" title="ลบรูปภาพ">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="p-4 flex-grow flex flex-col justify-between bg-white">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full uppercase">${img.plant}</span>
+                                    <span class="text-xs text-gray-400 font-medium">${img.time}</span>
+                                </div>
+                                <h3 class="font-bold text-gray-800 text-sm mb-1">${img.area}</h3>
+                            </div>
+                            <div class="text-xs text-gray-500 flex justify-between items-center mt-2 pt-2 border-t border-gray-50">
+                                <span><i class="far fa-calendar-alt mr-1"></i> ${img.date}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            gridEl.innerHTML = html;
+        }
+
+        // Copy image blob using modern Clipboard API with URL fallback
+        window.copyImage = async function(imageUrl) {
+            try {
+                showToast('กำลังเตรียมคัดลอกรูปภาพ...', 'info');
+                const response = await fetch(imageUrl);
+                const blob = await response.blob();
+                
+                if (navigator.clipboard && window.ClipboardItem) {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({
+                            [blob.type]: blob
+                        })
+                    ]);
+                    showToast('คัดลอกรูปภาพไปยังคลิปบอร์ดสำเร็จ! 📋', 'success');
+                } else {
+                    throw new Error('ClipboardItem not supported');
+                }
+            } catch (err) {
+                console.warn('Failed to copy image blob, falling back to URL copy:', err);
+                try {
+                    await navigator.clipboard.writeText(imageUrl);
+                    showToast('คัดลอกลิงก์รูปภาพสำเร็จ! 🔗', 'success');
+                } catch (textErr) {
+                    showToast('ไม่สามารถคัดลอกรูปภาพได้ ❌', 'error');
+                }
+            }
+        };
+
+        // Delete Image from Cloudinary via GAS Proxy (JSONP version)
+        window.deleteImage = async function(publicId) {
+            const ok = confirm(`⚠️ ยืนยันการลบรูปภาพ?\n\nรูปภาพนี้จะถูกลบออกจาก Cloudinary อย่างถาวร และไม่สามารถกู้คืนได้`);
+            if (!ok) return;
+            
+            if (!GAS_PROXY_URL) {
+                showToast('กรุณาตั้งค่า GAS Proxy URL ในโค้ดก่อนลบรูปภาพ', 'error');
+                return;
+            }
+            
+            try {
+                showToast('กำลังลบรูปภาพ...', 'info');
+                let url = `${GAS_PROXY_URL}?action=delete&publicId=${encodeURIComponent(publicId)}&_t=${Date.now()}`;
+                const result = await fetchJsonp(url);
+                
+                // Note: Cloudinary might return 'deleted' or 'not_found' (if already deleted in Cloudinary but still in list cache)
+                const isDeleted = result.status === 'ok' && result.result && result.result.deleted && 
+                    (result.result.deleted[publicId] === 'deleted' || result.result.deleted[publicId] === 'not_found');
+                
+                if (isDeleted) {
+                    showToast('ลบรูปภาพสำเร็จ! 🗑️', 'success');
+                    
+                    // Save to localStorage to prevent reappearing due to Cloudinary index eventual consistency delay
+                    try {
+                        let localDeletedIds = JSON.parse(localStorage.getItem('deleted_public_ids') || '[]');
+                        if (!localDeletedIds.includes(publicId)) {
+                            localDeletedIds.push(publicId);
+                            localStorage.setItem('deleted_public_ids', JSON.stringify(localDeletedIds));
+                        }
+                    } catch (e) {
+                        console.error('Failed to save deleted image ID to localStorage:', e);
+                    }
+                    
+                    galleryImages = galleryImages.filter(img => img.publicId !== publicId);
+                    renderFilters();
+                    renderGalleryGrid();
+                } else {
+                    const errMsg = result.message || 'การลบล้มเหลว';
+                    throw new Error(errMsg);
+                }
+            } catch (err) {
+                console.error('Delete error:', err);
+                showToast(`ลบไม่สำเร็จ: ${err.message}`, 'error');
+            }
+        };
+
+        // Lightbox modal elements & controls
+        const lightboxModal = document.getElementById('lightboxModal');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxCaption = document.getElementById('lightboxCaption');
+        const closeLightboxBtn = document.getElementById('closeLightbox');
+        const lightboxCopyBtn = document.getElementById('lightboxCopyBtn');
+        const lightboxDownloadBtn = document.getElementById('lightboxDownloadBtn');
+        
+        let currentLightboxUrl = '';
+        
+        window.openLightbox = function(url, caption) {
+            currentLightboxUrl = url;
+            lightboxImg.src = url;
+            lightboxCaption.textContent = caption;
+            lightboxDownloadBtn.href = url;
+            lightboxModal.classList.remove('hidden');
+        };
+        
+        function closeLightbox() {
+            lightboxModal.classList.add('hidden');
+            lightboxImg.src = '';
+            lightboxCaption.textContent = '';
+        }
+        
+        closeLightboxBtn.addEventListener('click', closeLightbox);
+        lightboxModal.addEventListener('click', (e) => {
+            if (e.target === lightboxModal || e.target === closeLightboxBtn || e.target.closest('#closeLightbox')) {
+                closeLightbox();
+            }
+        });
+        
+        lightboxCopyBtn.addEventListener('click', () => {
+            if (currentLightboxUrl) {
+                copyImage(currentLightboxUrl);
+            }
+        });
+
+        // Search, refresh, load more bindings
+        document.getElementById('btnRefreshGallery').addEventListener('click', () => loadGallery(false));
+        document.getElementById('gallerySearchInput').addEventListener('input', renderGalleryGrid);
+        document.getElementById('btnLoadMore').addEventListener('click', () => loadGallery(true));
+        
+        // Globals export
+        window.switchTab = switchTab;
+        window.loadGallery = loadGallery;
     </script>
 </body>
 </html>
