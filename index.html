@@ -2557,30 +2557,31 @@
                             throw new Error('ไม่สามารถสร้างไฟล์ได้');
                         }
                         
-                        // 1. Download ไฟล์ลงเครื่อง
-                        try {
-                            const url = URL.createObjectURL(blob);
-                            const link = document.createElement('a');
-                            link.download = fileName + '.png';
-                            link.href = url;
-                            link.style.display = 'none';
-                            
-                            document.body.appendChild(link);
-                            link.click();
-                            
-                            // รอสักครู่ก่อน cleanup
-                            setTimeout(() => {
-                                document.body.removeChild(link);
-                                URL.revokeObjectURL(url);
-                            }, 100);
-                            
-                            console.log('File download initiated:', fileName);
-                        } catch (downloadError) {
-                            console.warn('Download failed:', downloadError);
-                            // ถ้า download ล้มเหลว ยังมี Cloudinary backup
-                        }
+                        // ฟังก์ชันช่วยดาวน์โหลดรูปภาพลงเครื่อง
+                        const triggerDownload = () => {
+                            try {
+                                const url = URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.download = fileName + '.png';
+                                link.href = url;
+                                link.style.display = 'none';
+                                
+                                document.body.appendChild(link);
+                                link.click();
+                                
+                                // รอสักครู่ก่อน cleanup
+                                setTimeout(() => {
+                                    document.body.removeChild(link);
+                                    URL.revokeObjectURL(url);
+                                }, 150);
+                                
+                                console.log('File download initiated:', fileName);
+                            } catch (downloadError) {
+                                console.warn('Download failed:', downloadError);
+                            }
+                        };
                         
-                        // 2. Upload ไป Cloudinary
+                        // Upload ไป Cloudinary ก่อน
                         const cloudName = localStorage.getItem('cld_cloud_name') || 'lik';
                         const uploadPreset = localStorage.getItem('cld_upload_preset') || 'REport-oper';
                         const formData = new FormData();
@@ -2606,6 +2607,10 @@
                         .then(data => {
                             console.log('Cloudinary upload success:', data);
                             console.log('Image URL:', data.secure_url);
+                            
+                            // ดาวน์โหลดลงเครื่องหลังจากอัปโหลดเสร็จสิ้น
+                            triggerDownload();
+                            
                             saveButtonContent.innerHTML = '<i class="fas fa-check"></i> บันทึกสำเร็จ! (เครื่อง + Cloud)';
                             setTimeout(() => {
                                 saveButtonContent.innerHTML = '<i class="fas fa-save"></i> Save';
@@ -2615,6 +2620,10 @@
                         .catch(error => {
                             console.error('Cloudinary upload error:', error);
                             console.error('Error details:', error.message);
+                            
+                            // ดาวน์โหลดลงเครื่องต่อ ถึงแม้ว่า Cloudinary จะล้มเหลว
+                            triggerDownload();
+                            
                             saveButtonContent.innerHTML = '<i class="fas fa-check"></i> บันทึกสำเร็จ! (เฉพาะเครื่อง)';
                             setTimeout(() => {
                                 saveButtonContent.innerHTML = '<i class="fas fa-save"></i> Save';
