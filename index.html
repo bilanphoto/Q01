@@ -1119,10 +1119,33 @@
                     </div>
                     
                     <div class="flex gap-2 w-full md:w-auto justify-end">
+                        <button id="btnToggleSelectMode" class="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                            <i class="fas fa-tasks"></i> เลือกหลายรูป
+                        </button>
                         <button id="btnRefreshGallery" class="px-4 py-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-sm font-semibold transition flex items-center gap-2">
                             <i class="fas fa-sync-alt"></i> รีเฟรช
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Selection Action Bar (hidden by default) -->
+            <div id="selectionActionBar" class="hidden bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm transition-all duration-300">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-700 rounded-full font-bold text-sm" id="selectedCountBadge">0</span>
+                    <span class="text-sm font-semibold text-gray-700 font-medium">รูปภาพที่เลือกอยู่</span>
+                </div>
+                
+                <div class="flex gap-2 w-full sm:w-auto justify-end">
+                    <button id="btnSelectAll" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                        <i class="fas fa-check-double"></i> เลือกทั้งหมด
+                    </button>
+                    <button id="btnCopySelected" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                        <i class="fas fa-copy"></i> คัดลอกลิงก์ทั้งหมด
+                    </button>
+                    <button id="btnDeleteSelected" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                        <i class="fas fa-trash-alt"></i> ลบที่เลือก
+                    </button>
                 </div>
             </div>
 
@@ -3000,6 +3023,8 @@
         let galleryImages = [];
         let currentFilterArea = 'All';
         let galleryNextCursor = null;
+        let isSelectMode = false;
+        let selectedPublicIds = [];
 
         // Helper function for JSONP requests to bypass GAS CORS redirect issues on local file:// origins
         function fetchJsonp(url) {
@@ -3249,10 +3274,8 @@
             }
         };
 
-        // Render Image cards grid
-        function renderGalleryGrid() {
-            const gridEl = document.getElementById('galleryGrid');
-            if (!gridEl) return;
+        // Helper to get currently filtered and visible images in the gallery
+        function getFilteredImages() {
             const searchVal = document.getElementById('gallerySearchInput').value.toLowerCase().trim();
             const dateVal = document.getElementById('galleryDateInput').value;
             
@@ -3277,6 +3300,15 @@
                     img.plant.toLowerCase().includes(searchVal)
                 );
             }
+            return filtered;
+        }
+
+        // Render Image cards grid
+        function renderGalleryGrid() {
+            const gridEl = document.getElementById('galleryGrid');
+            if (!gridEl) return;
+            
+            const filtered = getFilteredImages();
             
             if (filtered.length === 0) {
                 gridEl.innerHTML = `
@@ -3290,23 +3322,37 @@
             
             let html = '';
             filtered.forEach(img => {
+                const isSelected = selectedPublicIds.includes(img.publicId);
                 html += `
-                    <div class="gallery-card relative bg-white rounded-2xl overflow-hidden border border-gray-150 shadow-md group hover:shadow-xl transition-all duration-300 flex flex-col">
+                    <div onclick="handleCardClick(event, '${img.publicId}', '${img.url}', '${img.plant} - ${img.area}')" 
+                         class="gallery-card relative bg-white rounded-2xl overflow-hidden border ${isSelected ? 'border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50/10' : 'border-gray-150'} shadow-md group hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer">
                         <div class="relative overflow-hidden aspect-video bg-gray-100">
-                            <!-- Image itself (allows native copy) -->
-                            <img src="${img.url}" alt="${img.area}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer" onclick="openLightbox('${img.url}', '${img.plant} - ${img.area}')" onerror="handleImageLoadError(this, '${img.publicId}')">
+                            <!-- Image itself -->
+                            <img src="${img.url}" alt="${img.area}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                             
+                            <!-- Selection Checkbox Overlay -->
+                            ${isSelectMode ? `
+                            <div class="absolute top-2 left-2 z-10 pointer-events-auto">
+                                <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-300'}" onclick="event.stopPropagation(); toggleSelectImage('${img.publicId}')">
+                                    ${isSelected ? '<i class="fas fa-check text-xs"></i>' : ''}
+                                </div>
+                            </div>
+                            ` : ''}
+
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 pointer-events-none"></div>
                             
+                            <!-- Actions (Hidden in select mode to prevent misclicks) -->
+                            ${!isSelectMode ? `
                             <!-- Copy Button -->
-                            <button onclick="copyImage('${img.url}')" class="absolute top-2 right-12 bg-white bg-opacity-95 hover:bg-opacity-100 hover:bg-indigo-50 text-gray-700 hover:text-indigo-600 p-2 rounded-xl shadow-md transition pointer-events-auto" title="คัดลอกรูปภาพ">
+                            <button onclick="event.stopPropagation(); copyImage('${img.url}')" class="absolute top-2 right-12 bg-white bg-opacity-95 hover:bg-opacity-100 hover:bg-indigo-50 text-gray-700 hover:text-indigo-600 p-2 rounded-xl shadow-md transition pointer-events-auto" title="คัดลอกรูปภาพ">
                                 <i class="fas fa-copy"></i>
                             </button>
                             
                             <!-- Delete Button (Trash Icon) -->
-                            <button onclick="deleteImage('${img.publicId}')" class="absolute top-2 right-2 bg-white bg-opacity-95 hover:bg-opacity-100 hover:bg-red-50 text-gray-700 hover:text-red-600 p-2 rounded-xl shadow-md transition pointer-events-auto" title="ลบรูปภาพ">
+                            <button onclick="event.stopPropagation(); deleteImage('${img.publicId}')" class="absolute top-2 right-2 bg-white bg-opacity-95 hover:bg-opacity-100 hover:bg-red-50 text-gray-700 hover:text-red-600 p-2 rounded-xl shadow-md transition pointer-events-auto" title="ลบรูปภาพ">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
+                            ` : ''}
                         </div>
                         
                         <div class="p-4 flex-grow flex flex-col justify-between bg-white">
@@ -3327,6 +3373,183 @@
             
             gridEl.innerHTML = html;
         }
+
+        // Handle clicking on a gallery card
+        window.handleCardClick = function(event, publicId, url, caption) {
+            if (event.target.closest('button')) return;
+            
+            if (isSelectMode) {
+                toggleSelectImage(publicId);
+            } else {
+                openLightbox(url, caption);
+            }
+        };
+        
+        // Toggle selection state of an image
+        window.toggleSelectImage = function(publicId) {
+            const index = selectedPublicIds.indexOf(publicId);
+            if (index > -1) {
+                selectedPublicIds.splice(index, 1);
+            } else {
+                selectedPublicIds.push(publicId);
+            }
+            updateSelectionUI();
+            renderGalleryGrid();
+        };
+
+        // Toggle Select Mode
+        window.toggleSelectMode = function() {
+            isSelectMode = !isSelectMode;
+            selectedPublicIds = [];
+            
+            const btn = document.getElementById('btnToggleSelectMode');
+            const actionBar = document.getElementById('selectionActionBar');
+            
+            if (isSelectMode) {
+                btn.innerHTML = `<i class="fas fa-times"></i> ยกเลิกเลือกรูป`;
+                btn.className = "px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-sm font-semibold transition flex items-center gap-2";
+                actionBar.classList.remove('hidden');
+            } else {
+                btn.innerHTML = `<i class="fas fa-tasks"></i> เลือกหลายรูป`;
+                btn.className = "px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl text-sm font-semibold transition flex items-center gap-2";
+                actionBar.classList.add('hidden');
+            }
+            
+            updateSelectionUI();
+            renderGalleryGrid();
+        };
+
+        // Update UI state for selection
+        function updateSelectionUI() {
+            const badge = document.getElementById('selectedCountBadge');
+            if (badge) badge.textContent = selectedPublicIds.length;
+            
+            const btnSelectAll = document.getElementById('btnSelectAll');
+            const visibleImages = getFilteredImages();
+            
+            if (btnSelectAll && visibleImages.length > 0) {
+                const allSelected = visibleImages.every(img => selectedPublicIds.includes(img.publicId));
+                if (allSelected) {
+                    btnSelectAll.innerHTML = `<i class="fas fa-minus-circle"></i> ล้างการเลือก`;
+                } else {
+                    btnSelectAll.innerHTML = `<i class="fas fa-check-double"></i> เลือกทั้งหมด`;
+                }
+            }
+        }
+
+        // Select All / Deselect All visible images
+        window.handleSelectAll = function() {
+            const visibleImages = getFilteredImages();
+            if (visibleImages.length === 0) return;
+            
+            const allSelected = visibleImages.every(img => selectedPublicIds.includes(img.publicId));
+            
+            if (allSelected) {
+                const visibleIds = visibleImages.map(img => img.publicId);
+                selectedPublicIds = selectedPublicIds.filter(id => !visibleIds.includes(id));
+            } else {
+                visibleImages.forEach(img => {
+                    if (!selectedPublicIds.includes(img.publicId)) {
+                        selectedPublicIds.push(img.publicId);
+                    }
+                });
+            }
+            updateSelectionUI();
+            renderGalleryGrid();
+        };
+
+        // Copy selected image URLs as newline-separated text
+        window.handleCopySelected = async function() {
+            if (selectedPublicIds.length === 0) {
+                showToast('กรุณาเลือกรูปภาพอย่างน้อย 1 รูป', 'error');
+                return;
+            }
+            
+            const urls = galleryImages
+                .filter(img => selectedPublicIds.includes(img.publicId))
+                .map(img => img.url);
+                
+            const textToCopy = urls.join('\n');
+            
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                showToast(`คัดลอกลิงก์ของรูปภาพทั้ง ${selectedPublicIds.length} รูปเรียบร้อยแล้ว! 🔗`, 'success');
+            } catch (err) {
+                showToast('ไม่สามารถคัดลอกลิงก์ได้ ❌', 'error');
+            }
+        };
+
+        // Delete multiple selected images via GAS in parallel
+        window.handleDeleteSelected = async function() {
+            const count = selectedPublicIds.length;
+            if (count === 0) {
+                showToast('กรุณาเลือกรูปภาพอย่างน้อย 1 รูป', 'error');
+                return;
+            }
+            
+            const ok = confirm(`⚠️ ยืนยันการลบรูปภาพทั้งหมด ${count} รูปที่เลือก?\n\nรูปภาพเหล่านี้จะถูกลบออกจาก Cloudinary อย่างถาวร และไม่สามารถกู้คืนได้`);
+            if (!ok) return;
+            
+            if (!GAS_PROXY_URL) {
+                showToast('กรุณาตั้งค่า GAS Proxy URL ในโค้ดก่อนลบรูปภาพ', 'error');
+                return;
+            }
+            
+            try {
+                showToast(`กำลังลบรูปภาพทั้งหมด ${count} รูป...`, 'info');
+                
+                let successCount = 0;
+                let failCount = 0;
+                
+                let localDeletedIds = JSON.parse(localStorage.getItem('deleted_public_ids') || '[]');
+                selectedPublicIds.forEach(id => {
+                    if (!localDeletedIds.includes(id)) {
+                        localDeletedIds.push(id);
+                    }
+                });
+                localStorage.setItem('deleted_public_ids', JSON.stringify(localDeletedIds));
+                
+                const idsToDelete = [...selectedPublicIds];
+                galleryImages = galleryImages.filter(img => !idsToDelete.includes(img.publicId));
+                
+                isSelectMode = false;
+                selectedPublicIds = [];
+                const btn = document.getElementById('btnToggleSelectMode');
+                const actionBar = document.getElementById('selectionActionBar');
+                btn.innerHTML = `<i class="fas fa-tasks"></i> เลือกหลายรูป`;
+                btn.className = "px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl text-sm font-semibold transition flex items-center gap-2";
+                actionBar.classList.add('hidden');
+                
+                renderFilters();
+                renderGalleryGrid();
+                
+                const deletePromises = idsToDelete.map(async (publicId) => {
+                    try {
+                        let url = `${GAS_PROXY_URL}?action=delete&publicId=${encodeURIComponent(publicId)}&_t=${Date.now()}`;
+                        const result = await fetchJsonp(url);
+                        if (result.status === 'ok') {
+                            successCount++;
+                        } else {
+                            failCount++;
+                        }
+                    } catch (err) {
+                        console.error('Delete error for ID:', publicId, err);
+                        failCount++;
+                    }
+                });
+                
+                await Promise.all(deletePromises);
+                
+                if (failCount === 0) {
+                    showToast(`ลบรูปภาพทั้งหมด ${successCount} รูปสำเร็จ! 🎉`, 'success');
+                } else {
+                    showToast(`ลบสำเร็จ ${successCount} รูป, ล้มเหลว ${failCount} รูป`, 'warning');
+                }
+            } catch (err) {
+                console.error('Bulk delete error:', err);
+                showToast(`ลบล้มเหลว: ${err.message}`, 'error');
+            }
+        };
 
         // Copy image blob using modern Clipboard API with URL fallback
         window.copyImage = async function(imageUrl) {
@@ -3450,6 +3673,12 @@
             document.getElementById('galleryDateInput').value = '';
             renderGalleryGrid();
         });
+        
+        // Selection bindings
+        document.getElementById('btnToggleSelectMode').addEventListener('click', toggleSelectMode);
+        document.getElementById('btnSelectAll').addEventListener('click', handleSelectAll);
+        document.getElementById('btnCopySelected').addEventListener('click', handleCopySelected);
+        document.getElementById('btnDeleteSelected').addEventListener('click', handleDeleteSelected);
         
         // Globals export
         window.switchTab = switchTab;
