@@ -2644,7 +2644,7 @@
                     const fileName = `${plant}_${areaText}_${day}-${month}-${year}_${hours}-${minutes}-${seconds}`;
                     
                     // แปลง canvas เป็น Blob แทน Data URL (รองรับมือถือดีกว่า)
-                    exportCanvas.toBlob((blob) => {
+                    exportCanvas.toBlob(async (blob) => {
                         if (!blob) {
                             throw new Error('ไม่สามารถสร้างไฟล์ได้');
                         }
@@ -2672,6 +2672,9 @@
                                 console.warn('Download failed:', downloadError);
                             }
                         };
+                        
+                        // ล้างพื้นที่คลาวด์แบบ FIFO ก่อนอัปโหลดรูปภาพใหม่
+                        await runCloudinaryCleanup();
                         
                         // Upload ไป Cloudinary ก่อน
                         const cloudName = localStorage.getItem('cld_cloud_name') || 'lik';
@@ -2823,6 +2826,9 @@
                 formData.append('folder', uploadPreset);
                 formData.append('public_id', fileName);
 
+                // ล้างพื้นที่คลาวด์แบบ FIFO ก่อนอัปโหลดรูปภาพใหม่
+                await runCloudinaryCleanup();
+
                 const cloudinaryRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
                     method: 'POST',
                     body: formData
@@ -2955,6 +2961,19 @@
             } else {
                 loginSec.classList.remove('hidden');
                 contentSec.classList.add('hidden');
+            }
+        }
+
+        // ฟังก์ชันสั่งล้างรูปเก่าหากเกินจำนวนจำกัด (150 รูป หรือ 500MB) แบบ FIFO ก่อนอัปโหลดรูปใหม่
+        async function runCloudinaryCleanup() {
+            if (!GAS_PROXY_URL) return;
+            try {
+                console.log('Running FIFO Cloudinary storage cleanup...');
+                const cleanupUrl = `${GAS_PROXY_URL}?action=cleanup&maxCount=150&maxSizeMB=500&_t=${Date.now()}`;
+                const res = await fetchJsonp(cleanupUrl);
+                console.log('Cleanup result:', res);
+            } catch (err) {
+                console.warn('Cleanup failed (non-critical):', err);
             }
         }
 
