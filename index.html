@@ -2964,12 +2964,12 @@
             }
         }
 
-        // ฟังก์ชันสั่งล้างรูปเก่าหากเกินจำนวนจำกัด (150 รูป หรือ 500MB) แบบ FIFO ก่อนอัปโหลดรูปใหม่
+        // ฟังก์ชันสั่งล้างรูปเก่าหากเกินจำนวนจำกัด (1,000 รูป หรือ 5,000MB / 5GB) แบบ FIFO ก่อนอัปโหลดรูปใหม่
         async function runCloudinaryCleanup() {
             if (!GAS_PROXY_URL) return;
             try {
                 console.log('Running FIFO Cloudinary storage cleanup...');
-                const cleanupUrl = `${GAS_PROXY_URL}?action=cleanup&maxCount=150&maxSizeMB=500&_t=${Date.now()}`;
+                const cleanupUrl = `${GAS_PROXY_URL}?action=cleanup&maxCount=1000&maxSizeMB=5000&_t=${Date.now()}`;
                 const res = await fetchJsonp(cleanupUrl);
                 console.log('Cleanup result:', res);
             } catch (err) {
