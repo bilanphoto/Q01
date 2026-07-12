@@ -2677,8 +2677,8 @@
                         await runCloudinaryCleanup();
                         
                         // Upload ไป Cloudinary ก่อน
-                        const cloudName = localStorage.getItem('cld_cloud_name') || 'lik';
-                        const uploadPreset = localStorage.getItem('cld_upload_preset') || 'pic';
+                        const cloudName = 'lik';
+                        const uploadPreset = 'pic';
                         const formData = new FormData();
                         formData.append('file', blob, fileName + '.png');
                         formData.append('upload_preset', uploadPreset);
@@ -2743,11 +2743,7 @@
 
         // ===== Teams Config =====
         // Google Apps Script Proxy (แก้ปัญหา CORS)
-        const oldGasUrl = 'https://script.google.com/macros/s/AKfycbwpTe6e6n3D5PJPHkmF8vhuWmHqndNMhpGrA7Xy0LNoWUSHDEUJUi2sQMnBQiZCyIr-qg/exec';
-        if (localStorage.getItem('gas_proxy_url') === oldGasUrl) {
-            localStorage.removeItem('gas_proxy_url');
-        }
-        let GAS_PROXY_URL = localStorage.getItem('gas_proxy_url') || 'https://script.google.com/macros/s/AKfycbxGSr9iizX1ZeKEHDKyCZe__6jVNlIuvgQglCTIon97wUc3xNzCtJTwGGXhFp97xHRynQ/exec';
+        let GAS_PROXY_URL = 'https://script.google.com/macros/s/AKfycby1R7wzFdmo7X7nyu2ucRtdzyUN0KjGLvMeoav7Y-sDlNzQzsS_ccr6l5G-hBgKBUbm1w/exec';
 
         const TEAMS_WEBHOOKS = {
             'GSP1 [Process]': 'https://defaultf2fda5e72ea1450d9fc12af5f86300.95.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f192e9ffb8be4125a3f19048b106cf37/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=kd_oLz2r1sqOF5bqeTLgEON2mH8lFDBUTYrG3n_ySC4',
@@ -2816,8 +2812,8 @@
                 const areaClean = area.replace(/\s+/g, '-').trim();
                 const fileName = `${plant}_${areaClean}_${day}-${month}-${year}_${hours}-${minutes}-${seconds}`;
 
-                const cloudName = localStorage.getItem('cld_cloud_name') || 'lik';
-                const uploadPreset = localStorage.getItem('cld_upload_preset') || 'pic';
+                const cloudName = 'lik';
+                const uploadPreset = 'pic';
 
                 const blob = await new Promise(resolve => compressCanvas.toBlob(resolve, 'image/jpeg', 0.85));
                 const formData = new FormData();
