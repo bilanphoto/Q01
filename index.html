@@ -2678,7 +2678,7 @@
                         
                         // Upload ไป Cloudinary ก่อน
                         const cloudName = localStorage.getItem('cld_cloud_name') || 'lik';
-                        const uploadPreset = localStorage.getItem('cld_upload_preset') || 'REport-oper';
+                        const uploadPreset = localStorage.getItem('cld_upload_preset') || 'pic';
                         const formData = new FormData();
                         formData.append('file', blob, fileName + '.png');
                         formData.append('upload_preset', uploadPreset);
@@ -2817,7 +2817,7 @@
                 const fileName = `${plant}_${areaClean}_${day}-${month}-${year}_${hours}-${minutes}-${seconds}`;
 
                 const cloudName = localStorage.getItem('cld_cloud_name') || 'lik';
-                const uploadPreset = localStorage.getItem('cld_upload_preset') || 'REport-oper';
+                const uploadPreset = localStorage.getItem('cld_upload_preset') || 'pic';
 
                 const blob = await new Promise(resolve => compressCanvas.toBlob(resolve, 'image/jpeg', 0.85));
                 const formData = new FormData();
