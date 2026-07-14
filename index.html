@@ -2677,12 +2677,12 @@
                         await runCloudinaryCleanup();
                         
                         // Upload ไป Cloudinary ก่อน
-                        const cloudName = 'lik';
-                        const uploadPreset = 'pic';
+                        const cloudName = 'likky';
+                        const uploadPreset = 'report-oper';
                         const formData = new FormData();
                         formData.append('file', blob, fileName + '.png');
                         formData.append('upload_preset', uploadPreset);
-                        formData.append('folder', uploadPreset);
+                        formData.append('folder', 'pic');
                         formData.append('public_id', fileName);
                         
                         console.log('Starting Cloudinary upload...', fileName);
@@ -2692,10 +2692,11 @@
                             body: formData,
                             mode: 'cors'
                         })
-                        .then(response => {
+                        .then(async response => {
                             console.log('Cloudinary response status:', response.status);
                             if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
+                                const errText = await response.text();
+                                throw new Error(`HTTP error! status: ${response.status}, body: ${errText}`);
                             }
                             return response.json();
                         })
@@ -2812,14 +2813,14 @@
                 const areaClean = area.replace(/\s+/g, '-').trim();
                 const fileName = `${plant}_${areaClean}_${day}-${month}-${year}_${hours}-${minutes}-${seconds}`;
 
-                const cloudName = 'lik';
-                const uploadPreset = 'pic';
+                const cloudName = 'likky';
+                const uploadPreset = 'report-oper';
 
                 const blob = await new Promise(resolve => compressCanvas.toBlob(resolve, 'image/jpeg', 0.85));
                 const formData = new FormData();
                 formData.append('file', blob, fileName + '.jpg');
                 formData.append('upload_preset', uploadPreset);
-                formData.append('folder', uploadPreset);
+                formData.append('folder', 'pic');
                 formData.append('public_id', fileName);
 
                 // ล้างพื้นที่คลาวด์แบบ FIFO ก่อนอัปโหลดรูปภาพใหม่
@@ -2832,7 +2833,8 @@
                 const cloudinaryData = await cloudinaryRes.json();
 
                 if (!cloudinaryData.secure_url) {
-                    throw new Error('Upload รูปไม่สำเร็จ');
+                    console.error('Cloudinary upload failure details:', cloudinaryData);
+                    throw new Error(cloudinaryData.error && cloudinaryData.error.message ? cloudinaryData.error.message : 'Upload รูปไม่สำเร็จ');
                 }
 
                 const imageUrl = cloudinaryData.secure_url;
