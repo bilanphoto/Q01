@@ -191,6 +191,12 @@
             transform: translateY(-1px);
         }
         
+        .input-group input.is-invalid,
+        .input-group select.is-invalid {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+        }
+        
         .input-group input[type="file"] {
             padding: 12px;
             cursor: pointer;
@@ -863,10 +869,12 @@
                         <option value="TANK FARM">TANK FARM</option>
                         <option value="GPPP">GPPP</option>
                     </select>
+                    <span id="plantError" class="text-xs text-red-500 font-semibold mt-1 hidden">* กรุณาเลือก Plant</span>
                 </div>
                 <div class="input-group">
                     <label for="areaTextInput">Area</label>
                     <input type="text" id="areaTextInput" placeholder="กรอก Area">
+                    <span id="areaError" class="text-xs text-red-500 font-semibold mt-1 hidden">* กรุณากรอก Area</span>
                 </div>
                 <div class="input-group">
                     <label for="titleJobInput">Title job</label>
@@ -2613,7 +2621,66 @@
             }
         });
 
+        // ฟังก์ชันตรวจสอบความถูกต้องของข้อมูล (Validation) สำหรับ Plant และ Area
+        function validatePlantAndArea() {
+            const plantEl = document.getElementById('areaInput');
+            const areaEl = document.getElementById('areaTextInput');
+            
+            const plantError = document.getElementById('plantError');
+            const areaError = document.getElementById('areaError');
+            
+            let isValid = true;
+            
+            // ตรวจสอบ Area (ตรวจสอบอันนี้ก่อนเพื่อให้ Plant โดน focus ทับหากว่างทั้งคู่ ซึ่งจะได้ลำดับจากบนลงล่าง)
+            if (!areaEl.value.trim()) {
+                areaError.classList.remove('hidden');
+                areaEl.classList.add('is-invalid');
+                areaEl.focus();
+                isValid = false;
+            } else {
+                areaError.classList.add('hidden');
+                areaEl.classList.remove('is-invalid');
+            }
+            
+            // ตรวจสอบ Plant
+            if (!plantEl.value) {
+                plantError.classList.remove('hidden');
+                plantEl.classList.add('is-invalid');
+                plantEl.focus();
+                isValid = false;
+            } else {
+                plantError.classList.add('hidden');
+                plantEl.classList.remove('is-invalid');
+            }
+            
+            return isValid;
+        }
+
+        // ล้างสถานะข้อผิดพลาดเมื่อผู้ใช้พิมพ์หรือเลือกข้อมูลใหม่
+        document.getElementById('areaInput').addEventListener('change', () => {
+            const plantEl = document.getElementById('areaInput');
+            const plantError = document.getElementById('plantError');
+            if (plantEl.value) {
+                plantError.classList.add('hidden');
+                plantEl.classList.remove('is-invalid');
+            }
+        });
+        
+        document.getElementById('areaTextInput').addEventListener('input', () => {
+            const areaEl = document.getElementById('areaTextInput');
+            const areaError = document.getElementById('areaError');
+            if (areaEl.value.trim()) {
+                areaError.classList.add('hidden');
+                areaEl.classList.remove('is-invalid');
+            }
+        });
+
         document.getElementById('saveButton').addEventListener('click', () => {
+            // ตรวจสอบความถูกต้องของข้อมูลก่อนบันทึก
+            if (!validatePlantAndArea()) {
+                return;
+            }
+
             const saveButton = document.getElementById('saveButton');
             const saveButtonContent = document.getElementById('saveButtonContent');
             
@@ -2759,6 +2826,11 @@
         };
 
         document.getElementById('teamsButton').addEventListener('click', async () => {
+            // ตรวจสอบความถูกต้องของข้อมูลก่อนส่งเข้า Teams
+            if (!validatePlantAndArea()) {
+                return;
+            }
+
             const teamsButton = document.getElementById('teamsButton');
             const teamsButtonContent = document.getElementById('teamsButtonContent');
 
@@ -2770,12 +2842,6 @@
             const shift    = document.getElementById('shiftInput').value || '-';
             const dateVal  = document.getElementById('dateInput').value || '-';
             const jobDesc  = document.getElementById('titleJopInput').value || '-';
-
-            // 1. เช็ค Plant
-            if (!plant) {
-                alert('⚠️ กรุณาเลือก Plant ก่อนส่งเข้า Teams');
-                return;
-            }
 
             // 2. เช็ค Webhook
             const webhookUrl = TEAMS_WEBHOOKS[plant];
